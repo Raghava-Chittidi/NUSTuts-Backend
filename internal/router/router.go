@@ -17,6 +17,7 @@ func StartRouter() *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	router.Route("/auth", routes.LoadAuthRoutes)
 	router.Route("/students", routes.LoadStudentRoutes)
 	router.Route("/teaching-assistants", routes.LoadTARoutes)
 	router.Route("/tutorials", routes.LoadTutorialRoutes)
