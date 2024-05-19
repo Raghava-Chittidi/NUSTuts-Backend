@@ -1,12 +1,14 @@
 package main
 
 import (
+	"NUSTuts-Backend/internal/application"
 	"NUSTuts-Backend/internal/database"
 	"NUSTuts-Backend/internal/util"
+	"context"
 	"log"
 )
 
-func main()  {
+func main() {
 	// Connect to db
 	err := database.Connect()
 	if err != nil {
@@ -17,5 +19,12 @@ func main()  {
 	err = util.Migrate()
 	if err != nil {
 		log.Fatalln("Failed to migrate models!", err)
+	}
+
+	// Start server
+	app := application.New()
+	serverErr := app.Start(context.TODO())
+	if serverErr != nil {
+		log.Fatal(err)
 	}
 }
