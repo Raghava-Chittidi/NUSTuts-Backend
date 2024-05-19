@@ -1,11 +1,9 @@
 package main
 
 import (
+	"NUSTuts-Backend/internal/application"
+	"context"
 	"log"
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
@@ -24,22 +22,9 @@ func main() {
 	// }
 
 	// Start server
-	router := chi.NewRouter()
-	router.Use(middleware.Logger)
-
-	router.Get("/hello", basicHandler)
-
-	server := &http.Server{
-		Addr:    ":3000",
-		Handler: router,
+	app := application.New()
+	err := app.Start(context.TODO())
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	serverErr := server.ListenAndServe()
-	if serverErr != nil {
-		log.Fatalln(serverErr)
-	}
-}
-
-func basicHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World!"))
 }
