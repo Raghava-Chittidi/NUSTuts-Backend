@@ -6,11 +6,9 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func LoadTutorialRoutes(router chi.Router) {
-	tutorialsHandler := &handlers.Tutorial{}
-
-	router.Post("/", tutorialsHandler.CreateTutorial)
-	router.Get("/", tutorialsHandler.GetTutorials)
-	router.Get("/{id}", tutorialsHandler.GetTutorialsByID)
-	router.Put("/{id}", tutorialsHandler.UpdateTutorialByID)
+func TutorialRoutes(r chi.Router) {
+	r.Post("/", handlers.CreateTutorial)
+	r.Get("/", handlers.GetTutorials)
+	r.Get("/{id}", handlers.GetTutorialsByID)
+	r.Put("/{id}", handlers.UpdateTutorialByID)
 }

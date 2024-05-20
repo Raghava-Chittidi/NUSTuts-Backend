@@ -5,16 +5,14 @@ import (
 	"net/http"
 )
 
-type Auth struct{}
-
-func (s *Auth) SignUp(w http.ResponseWriter, r *http.Request) {
+func SignUp(w http.ResponseWriter, r *http.Request) {
 	log.Default().Println("Sign up")
 }
 
-func (s *Auth) Login(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
 	log.Default().Println("Log in")
 }
 
-func (s *Auth) Logout(w http.ResponseWriter, r *http.Request) {
+func Logout(w http.ResponseWriter, r *http.Request) {
 	log.Default().Println("Log out")
 }

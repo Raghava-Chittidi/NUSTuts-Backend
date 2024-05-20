@@ -6,12 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func LoadStudentRoutes(router chi.Router) {
-	studentHandler := &handlers.Student{}
-
-	router.Post("/", studentHandler.CreateStudent)
-	router.Get("/", studentHandler.GetStudents)
-	router.Get("/{id}", studentHandler.GetStudentByID)
-	router.Put("/{id}", studentHandler.UpdateStudentByID)
-	router.Delete("/{id}", studentHandler.DeleteByID)
+func StudentRoutes(r chi.Router) {
+	r.Post("/", handlers.CreateStudent)
+	r.Get("/", handlers.GetStudents)
+	r.Get("/{id}", handlers.GetStudentByID)
+	r.Put("/{id}", handlers.UpdateStudentByID)
+	r.Delete("/{id}", handlers.DeleteByID)
 }
