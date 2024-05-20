@@ -6,12 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func LoadTARoutes(router chi.Router) {
-	teachingAssistantsHandler := &handlers.TeachingAssistant{}
-
-	router.Post("/", teachingAssistantsHandler.CreateTA)
-	router.Get("/", teachingAssistantsHandler.GetTAs)
-	router.Get("/{id}", teachingAssistantsHandler.GetTAByID)
-	router.Put("/{id}", teachingAssistantsHandler.UpdateTAByID)
-	router.Delete("/{id}", teachingAssistantsHandler.DeleteTAByID)
+func TARoutes(r chi.Router) {
+	r.Post("/", handlers.CreateTA)
+	r.Get("/", handlers.GetTAs)
+	r.Get("/{id}", handlers.GetTAByID)
+	r.Put("/{id}", handlers.UpdateTAByID)
+	r.Delete("/{id}", handlers.DeleteTAByID)
 }

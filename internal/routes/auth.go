@@ -6,10 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func LoadAuthRoutes(router chi.Router) {
-	authHandler := &handlers.Auth{}
-
-	router.Post("/login", authHandler.Login)
-	router.Post("/signup", authHandler.SignUp)
-	router.Get("/logout", authHandler.Logout)
+func AuthRoutes(r chi.Router) {
+	r.Post("/login", handlers.Login)
+	r.Post("/signup", handlers.SignUp)
+	r.Get("/logout", handlers.Logout)
 }

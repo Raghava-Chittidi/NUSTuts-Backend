@@ -1,14 +1,17 @@
 package main
 
 import (
-	"NUSTuts-Backend/internal/application"
 	"NUSTuts-Backend/internal/database"
+	"NUSTuts-Backend/internal/router"
 	"NUSTuts-Backend/internal/util"
-	"context"
 	"log"
+	"net/http"
 )
 
 func main() {
+	// Setup router
+	r := router.Setup()
+
 	// Connect to db
 	err := database.Connect()
 	if err != nil {
@@ -22,9 +25,5 @@ func main() {
 	}
 
 	// Start server
-	app := application.New()
-	serverErr := app.Start(context.TODO())
-	if serverErr != nil {
-		log.Fatal(err)
-	}
+	log.Fatalln(http.ListenAndServe(":5000", r))
 }
