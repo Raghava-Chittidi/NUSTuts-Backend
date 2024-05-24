@@ -2,15 +2,13 @@ package routes
 
 import (
 	"NUSTuts-Backend/internal/handlers/auth"
-	"NUSTuts-Backend/internal/handlers/auth/studentAuth"
-	"NUSTuts-Backend/internal/handlers/auth/teachingAssistantAuth"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func AuthRoutes(r chi.Router) {
-	r.Post("/loginStudent", studentAuth.LoginAsStudent)
-	r.Post("/loginTA", teachingAssistantAuth.LoginAsTA)
-	r.Post("/signupStudent", studentAuth.SignUpAsStudent)
+	r.Post("/signupStudent", auth.SignUpAsStudent)
+	r.Post("/loginStudent", auth.LoginAsStudent)
+	r.Post("/loginTA", auth.LoginAsTA)
 	r.Get("/logout", auth.Logout)
 }

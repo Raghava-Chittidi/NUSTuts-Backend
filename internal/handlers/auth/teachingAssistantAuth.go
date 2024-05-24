@@ -1,4 +1,4 @@
-package teachingAssistantAuth
+package auth
 
 import (
 	"NUSTuts-Backend/internal/api"
