@@ -1,6 +1,7 @@
 package router
 
 import (
+	"NUSTuts-Backend/internal/middlewares"
 	"NUSTuts-Backend/internal/routes"
 
 	"github.com/go-chi/chi/v5"
@@ -14,7 +15,13 @@ func Setup() chi.Router {
 }
 
 func setupRoutes(r chi.Router) {
+	r.Use(middlewares.CORS)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Route("/api", routes.AllRoutes())
+	
+	r.Route("/api", func(r chi.Router) {
+		r.Group(routes.PublicRoutes())
+		r.Use(middlewares.AuthoriseUser)
+		r.Group(routes.ProtectedRoutes())
+	})
 }
