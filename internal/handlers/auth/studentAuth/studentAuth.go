@@ -2,12 +2,12 @@ package studentAuth
 
 import (
 	"NUSTuts-Backend/internal/api"
+	"NUSTuts-Backend/internal/auth"
 	data "NUSTuts-Backend/internal/dataaccess"
 	"NUSTuts-Backend/internal/database"
 	"NUSTuts-Backend/internal/models"
 	"NUSTuts-Backend/internal/util"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
@@ -15,52 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
-
-type authInfo struct {
-	ID           int
-	Email        string
-	Username     string
-	AccessToken  string
-	RefreshToken string
-}
-
-type StudentUser struct {
-	Name     string
-	Email    string
-	Password string
-}
-
-type authStudentUser struct {
-	name         string
-	email        string
-	passwordHash string
-}
-
-var authStudentUserDB = map[string]authStudentUser{}
-
-var DefaultStudentUserService studentUserService
-
-type studentUserService struct {
-}
-
-func (studentUserService) createStudentUser(newStudentUser StudentUser) error {
-	_, ok := authStudentUserDB[newStudentUser.Email]
-	if ok {
-		fmt.Println("Student user already exists")
-		return errors.New("student user already exists")
-	}
-	passwordHash, err := util.GetPasswordHash(newStudentUser.Password)
-	if err != nil {
-		return err
-	}
-	newAuthStudentUser := authStudentUser{
-		name:         newStudentUser.Name,
-		email:        newStudentUser.Email,
-		passwordHash: passwordHash,
-	}
-	authStudentUserDB[newStudentUser.Email] = newAuthStudentUser
-	return nil
-}
 
 func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
@@ -76,7 +30,7 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if payload.Name == "" {
-		util.ErrorJSON(w, errors.New("Invalid username!"))
+		util.ErrorJSON(w, errors.New("Invalid name!"))
 		return
 	}
 
@@ -121,16 +75,35 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
-	log.Default().Println("Log in")
-}
-
-func getStudentUser(r *http.Request) StudentUser {
-	name := r.FormValue("name")
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-	return StudentUser{
-		Name:     name,
-		Email:    email,
-		Password: password,
+	var payload struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
+
+	err := util.ReadJSON(w, r, &payload)
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	student, err := data.GetStudentByEmail(payload.Email)
+	if err != nil {
+		util.ErrorJSON(w, errors.New("Student with this email does not exist!"))
+		return
+	}
+
+	valid, err := util.VerifyPassword(payload.Password, student.Password)
+	if err != nil || !valid {
+		util.ErrorJSON(w, errors.New("Incorrect Password!"))
+		return
+	}
+
+	authenticatedStudent := auth.AuthenticatedUser{
+		ID:    int(student.ID),
+		Name:  student.Name,
+		Email: student.Email,
+		Role:  auth.GetRoleByEmail(student.Email),
+	}
+
+	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedStudent}, http.StatusOK)
 }
