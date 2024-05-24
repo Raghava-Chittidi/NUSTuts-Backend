@@ -1,12 +1,28 @@
 package studentAuth
 
 import (
+	"NUSTuts-Backend/internal/api"
+	data "NUSTuts-Backend/internal/dataaccess"
+	"NUSTuts-Backend/internal/database"
+	"NUSTuts-Backend/internal/models"
 	"NUSTuts-Backend/internal/util"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"net/mail"
+
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
+
+type authInfo struct {
+	ID           int
+	Email        string
+	Username     string
+	AccessToken  string
+	RefreshToken string
+}
 
 type StudentUser struct {
 	Name     string
@@ -47,11 +63,61 @@ func (studentUserService) createStudentUser(newStudentUser StudentUser) error {
 }
 
 func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
-	newStudentUser := getStudentUser(r)
-	err := DefaultStudentUserService.createStudentUser(newStudentUser)
-	if err != nil {
-		log.Println(err, "Student Sign Up Failed")
+	var payload struct {
+		Name     string
+		Email    string
+		Password string
 	}
+
+	err := util.ReadJSON(w, r, &payload)
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	if payload.Name == "" {
+		util.ErrorJSON(w, errors.New("Invalid username!"))
+		return
+	}
+
+	_, err = mail.ParseAddress(payload.Email)
+	if err != nil {
+		log.Println(err)
+		util.ErrorJSON(w, errors.New("Invalid email!"))
+		return
+	}
+
+	_, err = data.GetStudentByEmail(payload.Email)
+	if err != gorm.ErrRecordNotFound {
+		util.ErrorJSON(w, errors.New("Email is in use!"))
+		return
+	}
+
+	if payload.Password == "" {
+		util.ErrorJSON(w, errors.New("Invalid password!"))
+		return
+	}
+
+	hashedPw, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	student := models.Student{
+		Name:     payload.Name,
+		Email:    payload.Email,
+		Password: string(hashedPw),
+		Modules:  []string{},
+	}
+	log.Println(student)
+	result := database.DB.Table("students").Create(&student)
+	if result.Error != nil {
+		util.ErrorJSON(w, result.Error, http.StatusInternalServerError)
+		return
+	}
+
+	util.WriteJSON(w, api.Response{Message: "Student created successfully"}, http.StatusCreated)
 }
 
 func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
