@@ -4,6 +4,8 @@ import (
 	"NUSTuts-Backend/internal/api"
 	"encoding/json"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Reads request body into data
@@ -41,4 +43,9 @@ func ErrorJSON(w http.ResponseWriter, err error, status ...int) {
 
 	resData := api.Response{Message: err.Error(), Error: err}
 	WriteJSON(w, resData, statusCode)
+}
+
+func GetPasswordHash(password string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 0)
+	return string(hash), err
 }
