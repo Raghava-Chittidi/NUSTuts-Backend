@@ -20,3 +20,18 @@ func GetTutorialById(id int) (*models.Tutorial, error) {
 
 	return &tutorial, nil
 }
+
+func JoinTutorial(studentId int, tutorialId int) error {
+	tutorial, err := GetTutorialById(tutorialId)
+	if err != nil {
+		return err
+	}
+
+	student, err := GetStudentById(studentId)
+	if err != nil {
+		return err
+	}
+
+	database.DB.Model(&tutorial).Association("Students").Append(&student)
+	return nil
+}
