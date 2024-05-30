@@ -99,10 +99,12 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authenticatedStudent := auth.AuthenticatedUser{
-		ID:    int(student.ID),
-		Name:  student.Name,
-		Email: student.Email,
-		Role:  auth.GetRoleByEmail(student.Email),
+		ID:          int(student.ID),
+		Name:        student.Name,
+		Email:       student.Email,
+		Role:        auth.GetRoleByEmail(student.Email),
+		StudentUser: student,
+		TAUser:      nil,
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedStudent}, http.StatusOK)
