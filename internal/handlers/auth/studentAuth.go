@@ -21,6 +21,7 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		Name     string
 		Email    string
 		Password string
+		Modules  []string
 	}
 
 	err := util.ReadJSON(w, r, &payload)
@@ -62,7 +63,7 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		Name:     payload.Name,
 		Email:    payload.Email,
 		Password: string(hashedPw),
-		Modules:  []string{},
+		Modules:  payload.Modules,
 	}
 	log.Println(student)
 	result := database.DB.Table("students").Create(&student)
