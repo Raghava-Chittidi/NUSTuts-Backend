@@ -7,8 +7,8 @@ import (
 )
 
 func AuthRoutes(r chi.Router) {
-	r.Post("/signupStudent", auth.SignUpAsStudent)
-	r.Post("/loginStudent", auth.LoginAsStudent)
-	r.Post("/loginTA", auth.LoginAsTA)
+	r.Post("/student/signup", auth.SignUpAsStudent)
+	r.Post("/student/login", auth.LoginAsStudent)
+	r.Post("/ta/login", auth.LoginAsTA)
 	r.Get("/logout", auth.Logout)
 }

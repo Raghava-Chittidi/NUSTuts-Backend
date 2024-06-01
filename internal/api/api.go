@@ -16,8 +16,14 @@ type RequestToJoinTutorialPayload struct {
 	TutorialID int `json:"tutorialId"`
 }
 
+type RequestResponse struct {
+	ID int `json:"id"`
+	Name string `json:"name"`
+	Email string `json:"email"`
+}
+
 type StudentAuthResponse struct {
-	ID int `json:"studentId"`
+	ID int `json:"id"`
 	Name string `json:"name"`
 	Email string `json:"email"`
 	Role auth.Role `json:"role"`
@@ -26,7 +32,7 @@ type StudentAuthResponse struct {
 }
 
 type TeachingAssistantAuthResponse struct {
-	ID int `json:"studentId"`
+	ID int `json:"id"`
 	Name string `json:"name"`
 	Email string `json:"email"`
 	Role auth.Role `json:"role"`

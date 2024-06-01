@@ -40,8 +40,19 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := api.Response{Message: "Requests fetched successfully", Data: requests}
-	util.WriteJSON(w, res, http.StatusCreated)
+	var data []api.RequestResponse
+	for _, request := range requests {
+		student, err := dataaccess.GetStudentById(request.StudentID)
+		if err != nil {
+			util.ErrorJSON(w, err, http.StatusInternalServerError)
+			return
+		}
+
+		data = append(data, api.RequestResponse{ID: int(request.ID), Name: student.Name, Email: student.Email})
+	}
+
+	res := api.Response{Message: "Requests fetched successfully", Data: data}
+	util.WriteJSON(w, res, http.StatusOK)
 }
 
 func AcceptRequest(w http.ResponseWriter, r *http.Request) {
