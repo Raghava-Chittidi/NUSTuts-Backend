@@ -39,7 +39,7 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tutorial, err := data.GetTutorialById(int(ta.TutorialID))
-	if err != nil || !valid {
+	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
