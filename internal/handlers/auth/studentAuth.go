@@ -103,9 +103,9 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 		ID:          int(student.ID),
 		Name:        student.Name,
 		Email:       student.Email,
-		Role:        auth.GetRoleByEmail(student.Email),
-		Modules: 	 student.Modules,
-		Tutorials: 	 student.Tutorials,
+		Role:        auth.RoleStudent,
+		Modules:	 student.Modules,
+		Tutorials:	 student.Tutorials,
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedStudent}, http.StatusOK)
