@@ -3,8 +3,6 @@ package auth
 import (
 	"time"
 
-	"NUSTuts-Backend/internal/models"
-
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -14,8 +12,8 @@ type AuthenticatedUser struct {
 	Email string `json:"email"`
 	Role  Role   `json:"role"`
 	// Hackish way to implement union type
-	StudentUser *models.Student           `json:"studentUser"`
-	TAUser      *models.TeachingAssistant `json:"taUser"`
+	// StudentUser *models.Student           `json:"studentUser"`
+	// TAUser      *models.TeachingAssistant `json:"taUser"`
 }
 
 type Tokens struct {

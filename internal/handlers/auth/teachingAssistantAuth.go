@@ -38,14 +38,18 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authenticatedTA := auth.AuthenticatedUser{
+	tutorial, err := data.GetTutorialById(int(ta.TutorialID))
+	if err != nil || !valid {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	authenticatedTA := api.TeachingAssistantAuthResponse{
 		ID:          int(ta.ID),
 		Name:        ta.Name,
 		Email:       ta.Email,
 		Role:        auth.GetRoleByEmail(ta.Email),
-		TAUser:      ta,
-		StudentUser: nil,
+		Tutorial:    *tutorial,
 	}
-
-	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTA}, http.StatusOK)
+util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTA}, http.StatusOK)
 }

@@ -1,5 +1,10 @@
 package api
 
+import (
+	"NUSTuts-Backend/internal/auth"
+	"NUSTuts-Backend/internal/models"
+)
+
 type Response struct {
 	Data interface{} `json:"data,omitempty"`
 	Message string `json:"message"`
@@ -9,4 +14,21 @@ type Response struct {
 type RequestToJoinTutorialPayload struct {
 	StudentID int `json:"studentId"`
 	TutorialID int `json:"tutorialId"`
+}
+
+type StudentAuthResponse struct {
+	ID int `json:"studentId"`
+	Name string `json:"name"`
+	Email string `json:"email"`
+	Role auth.Role `json:"role"`
+	Modules []string `json:"modules"`
+	Tutorials []models.Tutorial `json:"tutorials"`
+}
+
+type TeachingAssistantAuthResponse struct {
+	ID int `json:"studentId"`
+	Name string `json:"name"`
+	Email string `json:"email"`
+	Role auth.Role `json:"role"`
+	Tutorial models.Tutorial `json:"tutorial"`
 }

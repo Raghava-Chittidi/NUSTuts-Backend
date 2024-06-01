@@ -65,7 +65,7 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		Password: string(hashedPw),
 		Modules:  payload.Modules,
 	}
-	log.Println(student)
+	
 	result := database.DB.Table("students").Create(&student)
 	if result.Error != nil {
 		util.ErrorJSON(w, result.Error, http.StatusInternalServerError)
@@ -99,13 +99,13 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authenticatedStudent := auth.AuthenticatedUser{
+	authenticatedStudent := api.StudentAuthResponse{
 		ID:          int(student.ID),
 		Name:        student.Name,
 		Email:       student.Email,
 		Role:        auth.GetRoleByEmail(student.Email),
-		StudentUser: student,
-		TAUser:      nil,
+		Modules:	 student.Modules,
+		Tutorials:	 student.Tutorials,
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedStudent}, http.StatusOK)
