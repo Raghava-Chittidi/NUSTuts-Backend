@@ -3,8 +3,8 @@ package auth
 import "strings"
 
 type Role struct {
-	UserType string
-	Privilege int
+	UserType string `json:"userType"`
+	Privilege int `json:"privilege"`
 }
 
 var (
