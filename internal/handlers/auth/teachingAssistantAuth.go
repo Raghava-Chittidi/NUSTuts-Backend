@@ -39,7 +39,7 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tutorial, err := data.GetTutorialById(int(ta.TutorialID))
-	if err != nil || !valid {
+	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -51,5 +51,6 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 		Role:        auth.RoleTeachingAssistant,
 		Tutorial:    *tutorial,
 	}
-util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTA}, http.StatusOK)
+	
+	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTA}, http.StatusOK)
 }

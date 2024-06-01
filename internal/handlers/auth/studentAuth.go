@@ -65,7 +65,7 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		Password: string(hashedPw),
 		Modules:  payload.Modules,
 	}
-	
+	log.Println(student)
 	result := database.DB.Table("students").Create(&student)
 	if result.Error != nil {
 		util.ErrorJSON(w, result.Error, http.StatusInternalServerError)
