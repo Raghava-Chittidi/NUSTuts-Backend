@@ -3,6 +3,7 @@ package auth
 import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/auth"
+	"NUSTuts-Backend/internal/dataaccess"
 	data "NUSTuts-Backend/internal/dataaccess"
 	"NUSTuts-Backend/internal/database"
 	"NUSTuts-Backend/internal/models"
@@ -99,13 +100,19 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tutorials, err := dataaccess.GetTutorialsByStudentId(int(student.ID))
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
 	authenticatedStudent := api.StudentAuthResponse{
 		ID:          int(student.ID),
 		Name:        student.Name,
 		Email:       student.Email,
 		Role:        auth.RoleStudent,
 		Modules:	 student.Modules,
-		Tutorials:	 student.Tutorials,
+		Tutorials:	 *tutorials,
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedStudent}, http.StatusOK)

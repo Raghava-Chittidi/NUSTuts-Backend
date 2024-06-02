@@ -5,10 +5,10 @@ import (
 	"NUSTuts-Backend/internal/models"
 )
 
-func CreateTeachingAssistant(name string, email string, password string, tutorialId uint) error {
-	teachingAssistant := &models.TeachingAssistant{Name: name, Email: email, Password: password, TutorialID: tutorialId}
+func CreateTeachingAssistant(name string, email string, password string) (*models.TeachingAssistant, error) {
+	teachingAssistant := &models.TeachingAssistant{Name: name, Email: email, Password: password}
 	result := database.DB.Table("teaching_assistants").Create(teachingAssistant)
-	return result.Error
+	return teachingAssistant, result.Error
 }
 
 func GetTeachingAssistantById(id int) (*models.TeachingAssistant, error) {

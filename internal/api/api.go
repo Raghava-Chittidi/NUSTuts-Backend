@@ -13,7 +13,8 @@ type Response struct {
 
 type RequestToJoinTutorialPayload struct {
 	StudentID int `json:"studentId"`
-	TutorialID int `json:"tutorialId"`
+	ModuleCode string `json:"moduleCode"`
+	ClassNo string `json:"classNo"`
 }
 
 type RequestResponse struct {
