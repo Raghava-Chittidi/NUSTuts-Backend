@@ -3,7 +3,9 @@ package util
 import (
 	"NUSTuts-Backend/internal/api"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -48,4 +50,22 @@ func ErrorJSON(w http.ResponseWriter, err error, status ...int) {
 func GetPasswordHash(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 0)
 	return string(hash), err
+}
+
+func GetCurrentSem() int {
+	if time.Now().Month() <= 7 {
+		return 2
+	}
+
+	return 1
+}
+
+func GetCurrentAY() string {
+	year := time.Now().Year()
+	sem := GetCurrentSem()
+	if sem == 1 {
+		return fmt.Sprintf("%d-%d", year, year + 1)
+	}
+
+	return fmt.Sprintf("%d-%d", year - 1, year)
 }

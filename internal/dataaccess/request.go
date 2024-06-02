@@ -13,7 +13,7 @@ func CreateRequest(studentId int, tutorialId int) error {
 
 func GetPendingRequestsByTutorialId(id int) ([]*models.Request, error) {
 	var requests []*models.Request
-	result := database.DB.Table("requests").Where("tutorialId = ?", id).Where("status = ?", "pending").Find(&requests)
+	result := database.DB.Table("requests").Where("tutorial_id = ?", id).Where("status = ?", "pending").Find(&requests)
 	if result.Error != nil {
 		return nil, result.Error
 	}

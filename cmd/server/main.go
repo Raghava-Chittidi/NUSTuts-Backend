@@ -24,6 +24,7 @@ func main() {
 		log.Fatalln("Failed to migrate models!", err)
 	}
 
+	// dataaccess.CreateTutorialsForEveryModule()
 	// Start server
 	log.Fatalln(http.ListenAndServe(":8000", r))
 }

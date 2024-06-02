@@ -18,7 +18,13 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dataaccess.CreateRequest(payload.StudentID, payload.TutorialID)
+	tutorial, err := dataaccess.GetTutorialByClassAndModuleCode(payload.ClassNo, payload.ModuleCode)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	err = dataaccess.CreateRequest(payload.StudentID, int(tutorial.ID))
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
