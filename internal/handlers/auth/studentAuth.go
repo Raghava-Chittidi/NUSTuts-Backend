@@ -73,7 +73,16 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.WriteJSON(w, api.Response{Message: "Student created successfully"}, http.StatusCreated)
+	authenticatedStudent := api.StudentAuthResponse{
+		ID:          int(student.ID),
+		Name:        student.Name,
+		Email:       student.Email,
+		Role:        auth.RoleStudent,
+		Modules: 	 student.Modules,
+		Tutorials: 	 student.Tutorials,
+	}
+
+	util.WriteJSON(w, api.Response{Message: "Student created successfully", Data: authenticatedStudent}, http.StatusCreated)
 }
 
 func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
