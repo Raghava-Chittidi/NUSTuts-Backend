@@ -11,4 +11,5 @@ func RequestRoutes(r chi.Router) {
 	r.Get("/{tutorialId}", handlers.AllPendingRequestsForTutorial)
 	r.Patch("/{requestId}/accept", handlers.AcceptRequest)
 	r.Patch("/{requestId}/reject", handlers.RejectRequest)
+	r.Get("/{studentId}/{moduleCode}", handlers.GetUnrequestedClassNo)
 }

@@ -4,6 +4,7 @@ import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/dataaccess"
 	"NUSTuts-Backend/internal/util"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -36,7 +37,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusNotFound)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -64,7 +65,7 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusNotFound)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -92,7 +93,7 @@ func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 func RejectRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusNotFound)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -103,4 +104,22 @@ func RejectRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Rejected request successfully!"}, http.StatusOK)
+}
+
+func GetUnrequestedClassNo(w http.ResponseWriter, r *http.Request) {
+	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	moduleCode := chi.URLParam(r, "moduleCode")
+	classNoArr, err := dataaccess.GetClassNoByStudentIdAndModuleCode(studentId, moduleCode)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	log.Println(classNoArr)
+	util.WriteJSON(w, api.Response{Message: "Fetched class no. successfully!", Data: classNoArr}, http.StatusOK)
 }
