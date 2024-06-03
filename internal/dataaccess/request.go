@@ -53,3 +53,16 @@ func RejectRequestById(id int) error {
 	return nil
 }
 
+func GetClassNoByStudentIdAndModuleCode(id int, moduleCode string) (*[]string, error) {
+	var classNoArr []string
+	result := database.DB.Table("requests").Joins("JOIN tutorials ON requests.tutorial_id = tutorials.id").
+				Where("requests.student_id = ?", id).Where("tutorials.module = ?", moduleCode).
+				Select("tutorial_code").Find(&classNoArr)
+	
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &classNoArr, nil
+}
+
