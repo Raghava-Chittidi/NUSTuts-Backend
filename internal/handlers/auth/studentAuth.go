@@ -73,13 +73,19 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tutorials, err := dataaccess.GetTutorialsByStudentId(int(student.ID))
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
 	authenticatedStudent := api.StudentAuthResponse{
 		ID:          int(student.ID),
 		Name:        student.Name,
 		Email:       student.Email,
 		Role:        auth.RoleStudent,
-		Modules: 	 student.Modules,
-		Tutorials: 	 student.Tutorials,
+		Modules:	 student.Modules,
+		Tutorials:	 *tutorials,
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Student created successfully", Data: authenticatedStudent}, http.StatusCreated)
