@@ -7,9 +7,9 @@ import (
 )
 
 func TARoutes(r chi.Router) {
-	r.Post("/", handlers.CreateTA)
-	r.Get("/", handlers.GetTAs)
-	r.Get("/{id}", handlers.GetTAByID)
-	r.Put("/{id}", handlers.UpdateTAByID)
-	r.Delete("/{id}", handlers.DeleteTAByID)
+	r.Post("/", handlers.CreateTeachingAssistant)
+	r.Get("/", handlers.GetTeachingAssistants)
+	r.Get("/{id}", handlers.GetTeachingAssistantByID)
+	r.Put("/{id}", handlers.UpdateTeachingAssistantByID)
+	r.Delete("/{id}", handlers.DeleteTeachingAssistantByID)
 }
