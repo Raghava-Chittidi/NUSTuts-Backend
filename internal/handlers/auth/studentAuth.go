@@ -27,30 +27,30 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	if payload.Name == "" {
-		util.ErrorJSON(w, errors.New("Invalid name!"))
+		util.ErrorJSON(w, errors.New("Invalid name!"), http.StatusBadRequest)
 		return
 	}
 
 	_, err = mail.ParseAddress(payload.Email)
 	if err != nil {
 		log.Println(err)
-		util.ErrorJSON(w, errors.New("Invalid email!"))
+		util.ErrorJSON(w, errors.New("Invalid email!"), http.StatusBadRequest)
 		return
 	}
 
 	_, err = data.GetStudentByEmail(payload.Email)
 	if err != gorm.ErrRecordNotFound {
-		util.ErrorJSON(w, errors.New("Email is in use!"))
+		util.ErrorJSON(w, errors.New("Email is in use!"), http.StatusBadRequest)
 		return
 	}
 
 	if payload.Password == "" {
-		util.ErrorJSON(w, errors.New("Invalid password!"))
+		util.ErrorJSON(w, errors.New("Invalid password!"), http.StatusBadRequest)
 		return
 	}
 
@@ -99,19 +99,19 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	student, err := data.GetStudentByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("Student with this email does not exist!"))
+		util.ErrorJSON(w, errors.New("Student with this email does not exist!"), http.StatusNotFound)
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, student.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("Incorrect Password!"))
+		util.ErrorJSON(w, errors.New("Incorrect Password!"), http.StatusUnauthorized)
 		return
 	}
 

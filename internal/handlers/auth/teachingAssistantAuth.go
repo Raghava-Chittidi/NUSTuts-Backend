@@ -22,19 +22,19 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	ta, err := data.GetTeachingAssistantByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("TA with this email does not exist!"))
+		util.ErrorJSON(w, errors.New("TA with this email does not exist!"), http.StatusNotFound)
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, ta.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("Incorrect Password!"))
+		util.ErrorJSON(w, errors.New("Incorrect Password!"), http.StatusUnauthorized)
 		return
 	}
 

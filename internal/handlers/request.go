@@ -15,7 +15,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 	var payload api.RequestToJoinTutorialPayload
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -37,7 +37,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -68,7 +68,7 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -96,7 +96,7 @@ func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 func RejectRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -112,7 +112,7 @@ func RejectRequest(w http.ResponseWriter, r *http.Request) {
 func GetUnrequestedClassNo(w http.ResponseWriter, r *http.Request) {
 	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
