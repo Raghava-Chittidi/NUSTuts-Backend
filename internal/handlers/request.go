@@ -47,7 +47,9 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data []api.RequestResponse
+	// Used to force data to at least be an empty array instead of null due to how json handles nil slices
+	// https://stackoverflow.com/questions/56200925/return-an-empty-array-instead-of-null-with-golang-for-json-return-with-gin
+	var data []api.RequestResponse = make([]api.RequestResponse, 0)
 	for _, request := range requests {
 		student, err := dataaccess.GetStudentById(request.StudentID)
 		if err != nil {
@@ -59,6 +61,7 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := api.Response{Message: "Requests fetched successfully", Data: data}
+
 	util.WriteJSON(w, res, http.StatusOK)
 }
 
