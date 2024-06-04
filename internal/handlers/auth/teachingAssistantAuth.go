@@ -14,7 +14,7 @@ import (
 // 	log.Default().Println("Sign up")
 // }
 
-func LoginAsTA(w http.ResponseWriter, r *http.Request) {
+func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -26,31 +26,31 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ta, err := data.GetTeachingAssistantByEmail(payload.Email)
+	teachingAssistant, err := data.GetTeachingAssistantByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("TA with this email does not exist!"), http.StatusNotFound)
+		util.ErrorJSON(w, errors.New("Teaching Assistant with this email does not exist!"), http.StatusNotFound)
 		return
 	}
 
-	valid, err := util.VerifyPassword(payload.Password, ta.Password)
+	valid, err := util.VerifyPassword(payload.Password, teachingAssistant.Password)
 	if err != nil || !valid {
 		util.ErrorJSON(w, errors.New("Incorrect Password!"), http.StatusUnauthorized)
 		return
 	}
 
-	tutorial, err := data.GetTutorialById(int(ta.TutorialID))
+	tutorial, err := data.GetTutorialById(int(teachingAssistant.TutorialID))
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	authenticatedTA := api.TeachingAssistantAuthResponse{
-		ID:          int(ta.ID),
-		Name:        ta.Name,
-		Email:       ta.Email,
+	authenticatedTeachingAssistant := api.TeachingAssistantAuthResponse{
+		ID:          int(teachingAssistant.ID),
+		Name:        teachingAssistant.Name,
+		Email:       teachingAssistant.Email,
 		Role:        auth.RoleTeachingAssistant,
 		Tutorial:    *tutorial,
 	}
 	
-	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTA}, http.StatusOK)
+	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTeachingAssistant}, http.StatusOK)
 }

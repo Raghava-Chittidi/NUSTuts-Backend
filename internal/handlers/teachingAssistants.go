@@ -8,11 +8,11 @@ import (
 
 var teachingAssistants []string = []string{"Alex", "Zap", "Bobby"}
 
-func CreateTA(w http.ResponseWriter, r *http.Request) {
+func CreateTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 	log.Default().Println("Create a TA")
 }
 
-func GetTAs(w http.ResponseWriter, r *http.Request) {
+func GetTeachingAssistants(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Convert []string to JSON []byte
@@ -26,17 +26,17 @@ func GetTAs(w http.ResponseWriter, r *http.Request) {
 	w.Write(teachingAssistantsBytes)
 }
 
-func GetTAByID(w http.ResponseWriter, r *http.Request) {
+func GetTeachingAssistantByID(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(teachingAssistants[0]))
 }
 
-func UpdateTAByID(w http.ResponseWriter, r *http.Request) {
+func UpdateTeachingAssistantByID(w http.ResponseWriter, r *http.Request) {
 	log.Default().Println("First TA changed to Lex")
 	teachingAssistants[0] = "Lex"
 	w.Write([]byte(teachingAssistants[0]))
 }
 
-func DeleteTAByID(w http.ResponseWriter, r *http.Request) {
+func DeleteTeachingAssistantByID(w http.ResponseWriter, r *http.Request) {
 	log.Default().Println("First TA deleted")
 	teachingAssistants = teachingAssistants[1:]
 }
