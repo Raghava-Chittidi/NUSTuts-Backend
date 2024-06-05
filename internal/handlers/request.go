@@ -15,7 +15,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 	var payload api.RequestToJoinTutorialPayload
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -37,7 +37,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -47,7 +47,9 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data []api.RequestResponse
+	// Used to force data to at least be an empty array instead of null due to how json handles nil slices
+	// https://stackoverflow.com/questions/56200925/return-an-empty-array-instead-of-null-with-golang-for-json-return-with-gin
+	var data []api.RequestResponse = make([]api.RequestResponse, 0)
 	for _, request := range requests {
 		student, err := dataaccess.GetStudentById(request.StudentID)
 		if err != nil {
@@ -59,13 +61,14 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := api.Response{Message: "Requests fetched successfully", Data: data}
+
 	util.WriteJSON(w, res, http.StatusOK)
 }
 
 func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -93,7 +96,7 @@ func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 func RejectRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -109,7 +112,7 @@ func RejectRequest(w http.ResponseWriter, r *http.Request) {
 func GetUnrequestedClassNo(w http.ResponseWriter, r *http.Request) {
 	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 

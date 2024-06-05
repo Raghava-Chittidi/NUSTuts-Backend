@@ -26,30 +26,30 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	if payload.Name == "" {
-		util.ErrorJSON(w, errors.New("invalid name"))
+		util.ErrorJSON(w, errors.New("invalid name"), http.StatusBadRequest)
 		return
 	}
 
 	_, err = mail.ParseAddress(payload.Email)
 	if err != nil {
 		log.Println(err)
-		util.ErrorJSON(w, errors.New("invalid email"))
+		util.ErrorJSON(w, errors.New("invalid email"), http.StatusBadRequest)
 		return
 	}
 
 	_, err = dataaccess.GetStudentByEmail(payload.Email)
 	if err != gorm.ErrRecordNotFound {
-		util.ErrorJSON(w, errors.New("email is in use"))
+		util.ErrorJSON(w, errors.New("email is in use"), http.StatusBadRequest)
 		return
 	}
 
 	if payload.Password == "" {
-		util.ErrorJSON(w, errors.New("invalid password"))
+		util.ErrorJSON(w, errors.New("invalid password"), http.StatusBadRequest)
 		return
 	}
 
@@ -114,19 +114,19 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	student, err := dataaccess.GetStudentByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("student with this email does not exist"))
+		util.ErrorJSON(w, errors.New("student with this email does not exist"), http.StatusNotFound)
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, student.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("incorrect password"))
+		util.ErrorJSON(w, errors.New("incorrect password"), http.StatusUnauthorized)
 		return
 	}
 
@@ -153,7 +153,7 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 		ID:          int(student.ID),
 		Name:        student.Name,
 		Email:       student.Email,
-		Role:        auth.RoleStudent,
+		Role:        auth.RoleStudent
 		Modules:	 student.Modules,
 		Tutorials:	 *tutorials,
 		Tokens: 	 tokens,
