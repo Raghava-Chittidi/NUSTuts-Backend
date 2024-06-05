@@ -9,11 +9,6 @@ import (
 	"net/http"
 )
 
-// Commented as sign up for TA is not needed
-// func SignUpAsTA(w http.ResponseWriter, r *http.Request) {
-// 	log.Default().Println("Sign up")
-// }
-
 func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Email    string `json:"email"`
@@ -28,13 +23,26 @@ func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 
 	teachingAssistant, err := data.GetTeachingAssistantByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("Teaching Assistant with this email does not exist!"), http.StatusNotFound)
+		util.ErrorJSON(w, errors.New("teaching Assistant with this email does not exist"), http.StatusNotFound)
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, teachingAssistant.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("Incorrect Password!"), http.StatusUnauthorized)
+		util.ErrorJSON(w, errors.New("incorrect password"), http.StatusUnauthorized)
+		return
+	}
+
+	authUser := auth.AuthenticatedUser{
+		ID:          int(ta.ID),
+		Name:        ta.Name,
+		Email:       ta.Email,
+		Role:        auth.RoleTeachingAssistant,
+	}
+
+	tokens, err := auth.AuthObj.GenerateTokens(&authUser)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -50,7 +58,10 @@ func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 		Email:       teachingAssistant.Email,
 		Role:        auth.RoleTeachingAssistant,
 		Tutorial:    *tutorial,
+		Tokens: 	 tokens,
 	}
 	
+	refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
+	http.SetCookie(w, refreshCookie)
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTeachingAssistant}, http.StatusOK)
 }

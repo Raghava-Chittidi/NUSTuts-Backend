@@ -30,6 +30,7 @@ type StudentAuthResponse struct {
 	Role auth.Role `json:"role"`
 	Modules []string `json:"modules"`
 	Tutorials []models.Tutorial `json:"tutorials"`
+	Tokens auth.Tokens `json:"tokens"`
 }
 
 type TeachingAssistantAuthResponse struct {
@@ -38,4 +39,5 @@ type TeachingAssistantAuthResponse struct {
 	Email string `json:"email"`
 	Role auth.Role `json:"role"`
 	Tutorial models.Tutorial `json:"tutorial"`
+	Tokens auth.Tokens `json:"tokens"`
 }

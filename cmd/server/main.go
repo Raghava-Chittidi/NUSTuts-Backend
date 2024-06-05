@@ -1,6 +1,7 @@
 package main
 
 import (
+	"NUSTuts-Backend/internal/auth"
 	"NUSTuts-Backend/internal/database"
 	"NUSTuts-Backend/internal/router"
 	"NUSTuts-Backend/internal/util"
@@ -24,7 +25,12 @@ func main() {
 		log.Fatalln("Failed to migrate models!", err)
 	}
 
-	// dataaccess.CreateTutorialsForEveryModule()
+	// Initialise auth obj
+	err = auth.InitialiseAuthObj()
+	if err != nil {
+		log.Fatalln("Failed to initialise auth obj!", err)
+	}
+
 	// Start server
 	log.Fatalln(http.ListenAndServe(":8000", r))
 }

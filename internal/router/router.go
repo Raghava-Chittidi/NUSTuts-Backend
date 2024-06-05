@@ -15,13 +15,12 @@ func Setup() chi.Router {
 }
 
 func setupRoutes(r chi.Router) {
-	r.Use(middlewares.CORS)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-
 	r.Route("/api", func(r chi.Router) {
+		r.Use(middlewares.CORS, middleware.Logger, middleware.Recoverer)
 		r.Group(routes.PublicRoutes())
-		// r.Use(middlewares.AuthoriseUser)
-		r.Group(routes.ProtectedRoutes())
+		r.Group(func(r chi.Router) {
+			r.Use(middlewares.AuthoriseUser)
+			r.Group(routes.ProtectedRoutes())
+		})
 	})
 }
