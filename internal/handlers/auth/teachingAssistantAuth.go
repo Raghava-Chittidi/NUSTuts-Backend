@@ -34,9 +34,9 @@ func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authUser := auth.AuthenticatedUser{
-		ID:          int(ta.ID),
-		Name:        ta.Name,
-		Email:       ta.Email,
+		ID:          int(teachingAssistant.ID),
+		Name:        teachingAssistant.Name,
+		Email:       teachingAssistant.Email,
 		Role:        auth.RoleTeachingAssistant,
 	}
 

@@ -153,7 +153,7 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 		ID:          int(student.ID),
 		Name:        student.Name,
 		Email:       student.Email,
-		Role:        auth.RoleStudent
+		Role:        auth.RoleStudent,
 		Modules:	 student.Modules,
 		Tutorials:	 *tutorials,
 		Tokens: 	 tokens,
