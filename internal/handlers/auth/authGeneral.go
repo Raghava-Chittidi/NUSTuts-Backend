@@ -74,6 +74,7 @@ func RefreshAuthStatus(w http.ResponseWriter, r *http.Request) {
 				refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
 				http.SetCookie(w, refreshCookie)
 				util.WriteJSON(w, api.Response{Message: "Refreshed auth status successfully!", Data: authenticatedStudent}, http.StatusOK)
+				return
 			} else if claims.Role.UserType == "teachingAssistant" {
 				teachingAssistant, err := dataaccess.GetTeachingAssistantById(userId)
 				if err != nil {
@@ -108,7 +109,7 @@ func RefreshAuthStatus(w http.ResponseWriter, r *http.Request) {
 				refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
 				http.SetCookie(w, refreshCookie)
 				util.WriteJSON(w, api.Response{Message: "Refreshed auth status successfully!", Data: authenticatedTA}, http.StatusOK)
-
+				return
 			} else {
 				util.ErrorJSON(w, errors.New("invalid user"), http.StatusUnauthorized)
 				return 
