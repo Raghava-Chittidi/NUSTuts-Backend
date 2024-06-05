@@ -9,11 +9,6 @@ import (
 	"net/http"
 )
 
-// Commented as sign up for TA is not needed
-// func SignUpAsTA(w http.ResponseWriter, r *http.Request) {
-// 	log.Default().Println("Sign up")
-// }
-
 func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Email    string `json:"email"`
@@ -28,13 +23,26 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 
 	ta, err := data.GetTeachingAssistantByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("TA with this email does not exist!"))
+		util.ErrorJSON(w, errors.New("ta with this email does not exist"))
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, ta.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("Incorrect Password!"))
+		util.ErrorJSON(w, errors.New("incorrect password"))
+		return
+	}
+
+	authUser := auth.AuthenticatedUser{
+		ID:          int(ta.ID),
+		Name:        ta.Name,
+		Email:       ta.Email,
+		Role:        auth.RoleTeachingAssistant,
+	}
+
+	tokens, err := auth.AuthObj.GenerateTokens(&authUser)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -50,7 +58,10 @@ func LoginAsTA(w http.ResponseWriter, r *http.Request) {
 		Email:       ta.Email,
 		Role:        auth.RoleTeachingAssistant,
 		Tutorial:    *tutorial,
+		Tokens: 	 tokens,
 	}
 	
+	refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
+	http.SetCookie(w, refreshCookie)
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTA}, http.StatusOK)
 }

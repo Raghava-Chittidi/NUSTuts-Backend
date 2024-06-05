@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,8 +14,12 @@ import (
 
 var AuthObj Auth
 
-func InitialiseAuthObj() {
-	godotenv.Load("../../.env")
+func InitialiseAuthObj() error {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		return err
+	}
+	
 	AuthObj = Auth{
 		AccessTokenExpiry: time.Minute * 15,
 		RefreshTokenExpiry: time.Hour * 24,
@@ -27,17 +30,15 @@ func InitialiseAuthObj() {
 		CookieName: "session-cookie",
 		CookiePath: "/",
 	}
+
+	return nil
 }
 
 func (a *Auth) GenerateTokens(user *AuthenticatedUser) (Tokens, error) {
 	accessToken := jwt.New(jwt.SigningMethodHS256)
 	claims := accessToken.Claims.(jwt.MapClaims)
-	role, err := json.Marshal(user.Role)
-	if err != nil {
-		return Tokens{}, err
-	}
 
-	claims["role"] = string(role)
+	claims["role"] = user.Role
 	claims["email"] = user.Email
 	claims["typ"] = "JWT"
 	claims["iss"] = a.Issuer
@@ -53,6 +54,8 @@ func (a *Auth) GenerateTokens(user *AuthenticatedUser) (Tokens, error) {
 
 	refreshToken := jwt.New(jwt.SigningMethodHS256)
 	refreshTokenClaims := refreshToken.Claims.(jwt.MapClaims)
+	refreshTokenClaims["role"] = user.Role
+	refreshTokenClaims["email"] = user.Email
 	refreshTokenClaims["sub"] = fmt.Sprint(user.ID)
 	refreshTokenClaims["iat"] = time.Now().UTC().Unix()
 	refreshTokenClaims["exp"] = time.Now().UTC().Add(a.RefreshTokenExpiry).Unix()

@@ -11,9 +11,6 @@ type AuthenticatedUser struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Role  Role   `json:"role"`
-	// Hackish way to implement union type
-	// StudentUser *models.Student           `json:"studentUser"`
-	// TAUser      *models.TeachingAssistant `json:"taUser"`
 }
 
 type Tokens struct {
