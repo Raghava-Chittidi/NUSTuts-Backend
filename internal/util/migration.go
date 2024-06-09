@@ -6,6 +6,8 @@ import (
 )
 
 func Migrate() error {
-	err := database.DB.AutoMigrate(&models.Student{}, &models.Tutorial{}, &models.TeachingAssistant{}, &models.Request{}, &models.Registry{})
+	err := database.DB.AutoMigrate(&models.Student{}, &models.Tutorial{}, 
+		&models.TeachingAssistant{}, &models.Request{}, &models.Registry{},
+		&models.TutorialFile{})
 	return err
 }

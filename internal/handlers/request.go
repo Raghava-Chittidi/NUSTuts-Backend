@@ -4,7 +4,6 @@ import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/dataaccess"
 	"NUSTuts-Backend/internal/util"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -123,6 +122,5 @@ func GetUnrequestedClassNo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(classNoArr)
 	util.WriteJSON(w, api.Response{Message: "Fetched class no. successfully!", Data: classNoArr}, http.StatusOK)
 }

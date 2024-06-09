@@ -17,6 +17,13 @@ type RequestToJoinTutorialPayload struct {
 	ClassNo string `json:"classNo"`
 }
 
+type UploadFilePayload struct {
+	TutorialID int `json:"tutorialId"`
+	Name string `json:"name"`
+	Week int `json:"week"`
+	Filepath string `json:"filepath"`
+}
+
 type RequestResponse struct {
 	ID int `json:"id"`
 	Name string `json:"name"`
@@ -40,4 +47,12 @@ type TeachingAssistantAuthResponse struct {
 	Role auth.Role `json:"role"`
 	Tutorial models.Tutorial `json:"tutorial"`
 	Tokens auth.Tokens `json:"tokens"`
+}
+
+type TutorialFilesResponse struct {
+	Files []models.TutorialFile `json:"files"`
+}
+
+type FilepathResponse struct {
+	Filepath string `json:"filepath"`
 }
