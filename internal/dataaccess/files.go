@@ -80,8 +80,8 @@ func DeleteTutorialFileByFilepath(filepath string) (error) {
 	return nil
 }
 
-func PrivateFileById(id int) error {
-	tutorialFile, err := GetTutorialFileById(id)
+func PrivateFileByFilepath(filepath string) error {
+	tutorialFile, err := GetTutorialFileByFilepath(filepath)
 	if err != nil {
 		return err
 	}
@@ -91,8 +91,8 @@ func PrivateFileById(id int) error {
 	return nil
 }
 
-func UnprivateFileById(id int) error {
-	tutorialFile, err := GetTutorialFileById(id)
+func UnprivateFileByFilepath(filepath string) error {
+	tutorialFile, err := GetTutorialFileByFilepath(filepath)
 	if err != nil {
 		return err
 	}

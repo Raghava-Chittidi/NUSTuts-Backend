@@ -11,6 +11,6 @@ func FileRoutes(r chi.Router) {
 	r.Get("/teachingAssistant/{tutorialId}/{week}", handlers.GetAllTutorialFilesForTAs)
 	r.Post("/upload", handlers.UploadFilepath)
 	r.Patch("/delete", handlers.DeleteFilepath)
-	r.Patch("/private/{tutorialFileId}", handlers.PrivateFile)
-	r.Patch("/unprivate/{tutorialFileId}", handlers.UnprivateFile)
+	r.Patch("/private", handlers.PrivateFile)
+	r.Patch("/unprivate", handlers.UnprivateFile)
 }

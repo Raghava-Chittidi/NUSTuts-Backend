@@ -30,6 +30,10 @@ type RequestResponse struct {
 	Email string `json:"email"`
 }
 
+type FilepathPayload struct {
+	Filepath string `json:"filepath"`
+}
+
 type StudentAuthResponse struct {
 	ID int `json:"id"`
 	Name string `json:"name"`

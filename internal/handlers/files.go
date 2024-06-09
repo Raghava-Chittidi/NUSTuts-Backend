@@ -86,9 +86,7 @@ func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
-	var payload struct {
-		Filepath string `json:"filepath"`
-	}
+	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
 		util.ErrorJSON(w, err)
@@ -106,13 +104,14 @@ func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
 }
 
 func PrivateFile(w http.ResponseWriter, r *http.Request) {
-	tutorialFileId, err := strconv.Atoi(chi.URLParam(r, "tutorialFileId"))
+	var payload api.FilepathPayload
+	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	err = dataaccess.PrivateFileById(tutorialFileId)
+	err = dataaccess.PrivateFileByFilepath(payload.Filepath)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
@@ -122,13 +121,14 @@ func PrivateFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func UnprivateFile(w http.ResponseWriter, r *http.Request) {
-	tutorialFileId, err := strconv.Atoi(chi.URLParam(r, "tutorialFileId"))
+	var payload api.FilepathPayload
+	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	err = dataaccess.UnprivateFileById(tutorialFileId)
+	err = dataaccess.UnprivateFileByFilepath(payload.Filepath)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
