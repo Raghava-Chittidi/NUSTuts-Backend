@@ -43,8 +43,8 @@ func AuthoriseUser(h http.Handler) http.Handler {
 		urlPath := r.URL.Path
 
 		// If the role privileges do not match the route they are trying to access
-		if (privilege != auth.RoleStudent.Privilege && strings.Contains(urlPath, "students")) || 
-			(privilege != auth.RoleTeachingAssistant.Privilege && strings.Contains(urlPath, "teaching-assistant")) {
+		if (privilege != auth.RoleStudent.Privilege && strings.Contains(urlPath, "student")) || 
+			(privilege != auth.RoleTeachingAssistant.Privilege && strings.Contains(urlPath, "teachingAssistant")) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
