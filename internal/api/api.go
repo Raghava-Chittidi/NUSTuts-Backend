@@ -34,6 +34,13 @@ type FilepathPayload struct {
 	Filepath string `json:"filepath"`
 }
 
+type CreateMesssagePayload struct {
+	TutorialID int `json:"tutorialId"`
+	SenderID int `json:"senderId"`
+	UserType string `json:"userType"`
+	Content string `json:"content"`
+}
+
 type StudentAuthResponse struct {
 	ID int `json:"id"`
 	Name string `json:"name"`
@@ -59,4 +66,15 @@ type TutorialFilesResponse struct {
 
 type FilepathResponse struct {
 	Filepath string `json:"filepath"`
+}
+
+type MessageResponse struct {
+	TutorialID int `json:"tutorialId"`
+	Sender string `json:"sender"`
+	UserType string `json:"userType"`
+	Content string `json:"content"`
+}
+
+type MessagesResponse struct {
+	Messages []MessageResponse `json:"messages"`
 }

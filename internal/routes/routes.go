@@ -17,5 +17,6 @@ func ProtectedRoutes() func(chi.Router) {
 		r.Route("/tutorials", TutorialRoutes)
 		r.Route("/requests", RequestRoutes)
 		r.Route("/files", FileRoutes)
+		r.Route("/messages", MessagesRoutes)
 	}
 }
