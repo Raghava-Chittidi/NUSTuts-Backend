@@ -2,9 +2,12 @@ package middlewares
 
 import (
 	"NUSTuts-Backend/internal/auth"
+	"NUSTuts-Backend/internal/dataaccess"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -48,10 +51,59 @@ func AuthoriseUser(h http.Handler) http.Handler {
 			return
 		}
 
-		if privilege != auth.RoleTeachingAssistant.Privilege && (strings.Contains(urlPath, "teachingAssistant")) || 
-		(strings.Contains(urlPath, "files") && !strings.Contains(urlPath, "student")) {
+		if privilege != auth.RoleTeachingAssistant.Privilege && strings.Contains(urlPath, "teachingAssistant") {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
+		}
+		
+		// Ensure students cannot access any file routes without "student" inside the route 
+		if privilege == auth.RoleStudent.Privilege && strings.Contains(urlPath, "files") && !strings.Contains(urlPath, "student") {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+func ValidateTutorialID(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, claims, err := auth.AuthObj.VerifyToken(w, r)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		userType := claims.Role.UserType
+		url := r.URL.String()
+		re := regexp.MustCompile(`(\d)+`)
+		matches := re.FindAllString(url, -1)
+		tutorialId, err := strconv.Atoi(matches[0])
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		id, err := strconv.Atoi(claims.Subject)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		// Ensure Student/TA who is making this request for a tutorial, is in that tutorial
+		if userType == "student" {
+			valid, err := dataaccess.CheckIfStudentInTutorialById(id, tutorialId)
+			if err != nil || !valid {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+		} else {
+			valid, err := dataaccess.CheckIfTeachingAssistantInTutorialById(id, tutorialId)
+			if err != nil || !valid {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 		}
 
 		h.ServeHTTP(w, r)
