@@ -35,9 +35,10 @@ type FilepathPayload struct {
 }
 
 type CreateMesssagePayload struct {
-	DiscussionID int `json:"discussionId"`
+	TutorialID int `json:"tutorialId"`
 	SenderID int `json:"senderId"`
 	UserType string `json:"userType"`
+	Content string `json:"content"`
 }
 
 type StudentAuthResponse struct {
@@ -67,6 +68,13 @@ type FilepathResponse struct {
 	Filepath string `json:"filepath"`
 }
 
+type MessageResponse struct {
+	TutorialID int `json:"tutorialId"`
+	Sender string `json:"sender"`
+	UserType string `json:"userType"`
+	Content string `json:"content"`
+}
+
 type MessagesResponse struct {
-	Messages []models.Message `json:"messages"`
+	Messages []MessageResponse `json:"messages"`
 }

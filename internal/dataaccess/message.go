@@ -5,20 +5,20 @@ import (
 	"NUSTuts-Backend/internal/models"
 )
 
-func CreateMessage(discussionId int, senderId int, userType string) error {
-	message := &models.Message{DiscussionID: discussionId, SenderID: senderId, UserType: userType}
+func CreateMessage(discussionId int, senderId int, userType string, content string) error {
+	message := &models.Message{DiscussionID: discussionId, SenderID: senderId, UserType: userType, Content: content}
 	result := database.DB.Table("messages").Create(message)
 	return result.Error
 }
 
 func GetMessagesByDiscussionId(id int) (*[]models.Message, error) {
-	var messages *[]models.Message
-	result := database.DB.Table("messages").Where("discussion_id = ?", id).Find(messages)
+	var messages []models.Message
+	result := database.DB.Table("messages").Where("discussion_id = ?", id).Find(&messages)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return messages, nil
+	return &messages, nil
 }
 
 func GetMessagesByTutorialId(id int) (*[]models.Message, error) {

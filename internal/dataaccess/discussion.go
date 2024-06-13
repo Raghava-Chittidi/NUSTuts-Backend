@@ -32,11 +32,11 @@ func CreateDiscussionForEveryTutorial() error {
 }
 
 func GetDiscussionIdByTutorialId(id int) (int, error) {
-	var discussionId int
-	result := database.DB.Table("discussions").Where("tutorial_id = ?", id).First(discussionId)
+	var discussion models.Discussion
+	result := database.DB.Table("discussions").Where("tutorial_id = ?", id).First(&discussion)
 	if result.Error != nil {
 		return -1, result.Error
 	}
 
-	return discussionId, nil
+	return int(discussion.ID), nil
 }
