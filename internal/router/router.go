@@ -21,6 +21,10 @@ func setupRoutes(r chi.Router) {
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.AuthoriseUser)
 			r.Group(routes.ProtectedRoutes())
+			r.Group(func(r chi.Router) {
+				r.Use(middlewares.ValidateTutorialID)
+				r.Group(routes.AuthorizedRoutes())
+			})
 		})
 	})
 }

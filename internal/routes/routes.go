@@ -16,6 +16,11 @@ func ProtectedRoutes() func(chi.Router) {
 		r.Route("/teachingAssistant", TARoutes)
 		r.Route("/tutorials", TutorialRoutes)
 		r.Route("/requests", RequestRoutes)
+	}
+}
+
+func AuthorizedRoutes() func(chi.Router) {
+	return func(r chi.Router) {
 		r.Route("/files", FileRoutes)
 		r.Route("/messages", MessagesRoutes)
 	}

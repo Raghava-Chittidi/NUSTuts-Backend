@@ -63,20 +63,26 @@ func GetAllTutorialFilesForStudents(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadFilepath(w http.ResponseWriter, r *http.Request) {
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
 	var payload api.UploadFilePayload
-	err := util.ReadJSON(w, r, &payload)
+	err = util.ReadJSON(w, r, &payload)
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	err = dataaccess.CheckIfNameExistsForTutorialIDAndWeek(payload.TutorialID, payload.Name, payload.Week)
+	err = dataaccess.CheckIfNameExistsForTutorialIDAndWeek(tutorialId, payload.Name, payload.Week)
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	err = dataaccess.CreateTutorialFile(payload.TutorialID, payload.Name, payload.Week, payload.Filepath)
+	err = dataaccess.CreateTutorialFile(tutorialId, payload.Name, payload.Week, payload.Filepath)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return

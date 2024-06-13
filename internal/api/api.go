@@ -18,7 +18,6 @@ type RequestToJoinTutorialPayload struct {
 }
 
 type UploadFilePayload struct {
-	TutorialID int `json:"tutorialId"`
 	Name string `json:"name"`
 	Week int `json:"week"`
 	Filepath string `json:"filepath"`
@@ -35,7 +34,6 @@ type FilepathPayload struct {
 }
 
 type CreateMesssagePayload struct {
-	TutorialID int `json:"tutorialId"`
 	SenderID int `json:"senderId"`
 	UserType string `json:"userType"`
 	Content string `json:"content"`

@@ -51,14 +51,20 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateMessageForTutorial(w http.ResponseWriter, r *http.Request) {
-	var payload api.CreateMesssagePayload
-	err := util.ReadJSON(w, r, &payload)
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	discussionId, err := dataaccess.GetDiscussionIdByTutorialId(payload.TutorialID)
+	var payload api.CreateMesssagePayload
+	err = util.ReadJSON(w, r, &payload)
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	discussionId, err := dataaccess.GetDiscussionIdByTutorialId(tutorialId)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return

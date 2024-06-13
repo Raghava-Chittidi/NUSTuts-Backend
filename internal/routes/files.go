@@ -9,8 +9,8 @@ import (
 func FileRoutes(r chi.Router) {
 	r.Get("/student/{tutorialId}/{week}", handlers.GetAllTutorialFilesForStudents)
 	r.Get("/teachingAssistant/{tutorialId}/{week}", handlers.GetAllTutorialFilesForTAs)
-	r.Post("/upload", handlers.UploadFilepath)
-	r.Patch("/delete", handlers.DeleteFilepath)
-	r.Patch("/private", handlers.PrivateFile)
-	r.Patch("/unprivate", handlers.UnprivateFile)
+	r.Post("/upload/{tutorialId}", handlers.UploadFilepath)
+	r.Patch("/delete/{tutorialId}", handlers.DeleteFilepath)
+	r.Patch("/private/{tutorialId}", handlers.PrivateFile)
+	r.Patch("/unprivate/{tutorialId}", handlers.UnprivateFile)
 }

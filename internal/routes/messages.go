@@ -7,6 +7,6 @@ import (
 )
 
 func MessagesRoutes(r chi.Router) {
-	r.Post("/", handlers.CreateMessageForTutorial)
 	r.Get("/{tutorialId}", handlers.GetAllMessagesForTutorial)
+	r.Post("/{tutorialId}", handlers.CreateMessageForTutorial)
 }
