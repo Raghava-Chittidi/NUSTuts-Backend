@@ -3,6 +3,7 @@ package dataaccess
 import (
 	"NUSTuts-Backend/internal/database"
 	"NUSTuts-Backend/internal/models"
+	"NUSTuts-Backend/internal/auth"
 	"errors"
 )
 
@@ -48,7 +49,15 @@ func BookConsultationById(id int) error {
 		return err
 	}
 
+	_, claims, err := auth.AuthObj.VerifyToken(w, r)
+	userID := claims.Subject // The "sub" claim is typically used for the user ID
+	
+	if consultation.StudentID != nil && consultation.StudentID != userID {
+		return errors.New("This consultation is booked by someone else")
+	}
+
 	consultation.Booked = true
+	consultation.StudentID = &userID
 	database.DB.Save(&consultation)
 	return nil
 }
@@ -59,7 +68,15 @@ func UnbookConsultationById(id int) error {
 		return err
 	}
 
+	_, claims, err := auth.AuthObj.VerifyToken(w, r)
+	userID := claims.Subject // The "sub" claim is typically used for the user ID
+	
+	if consultation.StudentID != userID {
+		return errors.New("You are not authorized to unbook this consultation")
+	}
+
 	consultation.Booked = false
+	consultation.StudentID = nil
 	database.DB.Save(&consultation)
 	return nil
 }
