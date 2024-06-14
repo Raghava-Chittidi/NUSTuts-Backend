@@ -7,6 +7,7 @@ import (
 	"NUSTuts-Backend/internal/util"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/samber/lo"
@@ -29,6 +30,13 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
+	}
+
+	if consultations.length == 0 && len(consultDate) == 0 {
+		//current date
+		today := time.Now()
+
+		util.GenerateConsultationsForYear(tutorialId, today.Year())
 	}
 
 	res := api.ConsultationsResponse{Consultations: *consultations}
