@@ -66,14 +66,36 @@ func GetConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Reques
 	util.WriteJSON(w, api.Response{Message: "Consultations for student fetched successfully!", Data: res}, http.StatusOK)
 }
 
-func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {
-	// If book is true, book the consultation, else unbook it
-	book, err := strconv.ParseBool(r.URL.Query().Get("book"))
-	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
+// func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {
+// 	// If book is true, book the consultation, else unbook it
+// 	book, err := strconv.ParseBool(r.URL.Query().Get("book"))
+// 	if err != nil {
+// 		util.ErrorJSON(w, err, http.StatusBadRequest)
+// 		return
+// 	}
 
+// 	consultationId, err := strconv.Atoi(chi.URLParam(r, "consultationId"))
+// 	if err != nil {
+// 		util.ErrorJSON(w, err, http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	_, claims, err := auth.AuthObj.VerifyToken(w, r)
+// 	userID := claims.Subject // The "sub" claim is typically used for the user ID
+// 	userIDInt, err := strconv.Atoi(userID)
+// 	if err != nil {
+// 		util.ErrorJSON(w, err, http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	if book {
+// 		dataaccess.BookConsultationById(consultationId, userIDInt)
+// 	} else {
+// 		dataaccess.UnbookConsultationById(consultationId, userIDInt)
+// 	}
+// }
+
+func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 	consultationId, err := strconv.Atoi(chi.URLParam(r, "consultationId"))
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
@@ -88,9 +110,23 @@ func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if book {
-		dataaccess.BookConsultationById(consultationId, userIDInt)
-	} else {
-		dataaccess.UnbookConsultationById(consultationId, userIDInt)
+	dataaccess.BookConsultationById(consultationId, userIDInt)
+}
+
+func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
+	consultationId, err := strconv.Atoi(chi.URLParam(r, "consultationId"))
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
 	}
+
+	_, claims, err := auth.AuthObj.VerifyToken(w, r)
+	userID := claims.Subject // The "sub" claim is typically used for the user ID
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	dataaccess.UnbookConsultationById(consultationId, userIDInt)
 }
