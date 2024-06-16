@@ -77,14 +77,6 @@ type MessagesResponse struct {
 	Messages []MessageResponse `json:"messages"`
 }
 
-type ConsultationResponse struct {
-	TutorialID int `json:"tutorialId"`
-	Date string `json:"date"`
-	StartTime string `json:"startTime"`
-	EndTime string `json:"endTime"`
-	Booked bool `json:"booked"`
-}
-
 type ConsultationsResponse struct {
-	Consultations []ConsultationResponse `json:"consultations"`
+	Consultations []models.Consultation `json:"consultations"`
 }
