@@ -34,8 +34,13 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if len(*consultations) == 0 {
+	if len(*consultations) < 2 {
 		util.GenerateConsultationsForDate(tutorialId, consultDate)
+		consultations, err = dataaccess.GetAllConsultationsForTutorialForDate(tutorialId, consultDate)
+		if err != nil {
+			util.ErrorJSON(w, err, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	res := api.ConsultationsResponse{Consultations: *consultations}
