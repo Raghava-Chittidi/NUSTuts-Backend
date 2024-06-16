@@ -19,7 +19,7 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	consultDate := chi.URLParam(r, "date")
+	consultDate := r.URL.Query().Get("date")
 
 	// Check if date is in the correct format
 	_, err = time.Parse("02-01-2006", consultDate)
@@ -68,7 +68,7 @@ func GetConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Reques
 
 func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {
 	// If book is true, book the consultation, else unbook it
-	book, err := strconv.ParseBool(chi.URLParam(r, "book"))
+	book, err := strconv.ParseBool(r.URL.Query().Get("book"))
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
