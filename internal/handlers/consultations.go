@@ -26,17 +26,21 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Check if date is in the correct format
+	_, err = time.Parse("02-01-2006", consultDate)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
 	consultations, err := dataaccess.GetAllConsultationsForTutorialForDate(consultDate)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	if consultations.length == 0 && len(consultDate) == 0 {
-		//current date
-		today := time.Now()
-
-		util.GenerateConsultationsForYear(tutorialId, today.Year())
+	if consultations.length == 0 {
+		util.GenerateConsultationsForDate(tutorialId, consultDate)
 	}
 
 	res := api.ConsultationsResponse{Consultations: *consultations}
