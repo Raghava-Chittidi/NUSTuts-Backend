@@ -33,7 +33,7 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
-	
+
 	if len(*consultations) < 2 {
 		util.GenerateConsultationsForDate(tutorialId, consultDate)
 		consultations, err = dataaccess.GetAllConsultationsForTutorialForDate(tutorialId, consultDate)
