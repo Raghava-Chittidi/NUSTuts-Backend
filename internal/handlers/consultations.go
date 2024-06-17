@@ -50,6 +50,40 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		Data: res}, http.StatusOK)
 }
 
+func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Request) {
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	dateParam := r.URL.Query().Get("date")
+	timeParam := r.URL.Query().Get("time")
+
+	// Check if date is in the correct format
+	_, err = time.Parse("02-01-2006", dateParam)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	// Check if time is in the correct format
+	_, err = time.Parse("15:04", timeParam)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForTA(tutorialId, dateParam, timeParam)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := getBookedConsultationsResponse(consultations)
+	util.WriteJSON(w, api.Response{Message: "Booked consultations for TA fetched successfully!", Data: res}, http.StatusOK)
+}
+
 func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -63,12 +97,35 @@ func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.
 		return
 	}
 
-	consultations, err := dataaccess.GetBookedConsultationsForTutorialForStudent(tutorialId, studentId)
+	dateParam := r.URL.Query().Get("date")
+	timeParam := r.URL.Query().Get("time")
+
+	// Check if date is in the correct format
+	_, err = time.Parse("02-01-2006", dateParam)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	// Check if time is in the correct format
+	_, err = time.Parse("15:04", timeParam)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForStudent(tutorialId, studentId, dateParam, timeParam)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
+	res := getBookedConsultationsResponse(consultations)
+	util.WriteJSON(w, api.Response{Message: "Booked consultations for student fetched successfully!", Data: res}, http.StatusOK)
+}
+
+// Returns a response object containing the booked consultations grouped by date
+func getBookedConsultationsResponse(consultations *[]models.Consultation) api.BookedConsultationsResponse {
 	// Group consultations by date
 	var groupedConsultations = make(map[string][]models.Consultation)
 	for _, consultation := range *consultations {
@@ -77,7 +134,7 @@ func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.
 
 	// Sort consultations by date of consultation, in format dd-mm-yyyy
 	// Each element in the array is an object containing the date, and the consultations array for that date
-	var sortedConsultations []api.BookedConsultationsByDate
+	var sortedConsultations []api.BookedConsultationsByDate = make([]api.BookedConsultationsByDate, 0)
 	for date, consults := range groupedConsultations {
 		sortedConsultations = append(sortedConsultations, api.BookedConsultationsByDate{Date: date, Consultations: consults})
 	}
@@ -89,8 +146,7 @@ func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.
 		return date1.Before(date2)
 	})
 
-	res := api.BookedConsultationsResponse{BookedConsultations: sortedConsultations}
-	util.WriteJSON(w, api.Response{Message: "Booked consultations for student fetched successfully!", Data: res}, http.StatusOK)
+	return api.BookedConsultationsResponse{BookedConsultations: sortedConsultations}
 }
 
 // func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {
