@@ -8,7 +8,7 @@ import (
 
 func ConsultationsRoutes(r chi.Router) {
 	r.Get("/{tutorialId}", handlers.GetConsultationsForTutorialForDate)
-	r.Get("/{tutorialId}/{studentId}", handlers.GetConsultationsForTutorialForStudent)
+	r.Get("/{tutorialId}/{studentId}", handlers.GetBookedConsultationsForTutorialForStudent)
 	r.Put("/{tutorialId}/book/{consultationId}", handlers.BookConsultationById)
 	r.Put("/{tutorialId}/cancel/{consultationId}", handlers.CancelConsultationById)
 }

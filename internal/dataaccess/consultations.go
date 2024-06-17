@@ -19,10 +19,11 @@ func GetAllConsultationsForTutorialForDate(tutorialId int, date string) (*[]mode
 	return &consultations, nil
 }
 
-func GetAllConsultationsForTutorialForStudent(tutorialId int, studentId int) (*[]models.Consultation, error) {
+func GetBookedConsultationsForTutorialForStudent(tutorialId int, studentId int) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").
 			Where("tutorial_id = ?", tutorialId).Where("student_id = ?", studentId).
+			Where("booked = true").
 			Order("date ASC").Order("start_time ASC").Find(&consultations)
 
 	if result.Error != nil {

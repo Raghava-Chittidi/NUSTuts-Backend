@@ -5,9 +5,11 @@ import (
 	"NUSTuts-Backend/internal/dataaccess"
 	"NUSTuts-Backend/internal/auth"
 	"NUSTuts-Backend/internal/util"
+	"NUSTuts-Backend/internal/models"
 	"net/http"
 	"strconv"
 	"time"
+	"sort"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -48,7 +50,7 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		Data: res}, http.StatusOK)
 }
 
-func GetConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Request) {
+func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
 		util.ErrorJSON(w, err)
@@ -61,14 +63,34 @@ func GetConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	consultations, err := dataaccess.GetAllConsultationsForTutorialForStudent(tutorialId, studentId)
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForStudent(tutorialId, studentId)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	res := api.ConsultationsResponse{Consultations: *consultations}
-	util.WriteJSON(w, api.Response{Message: "Consultations for student fetched successfully!", Data: res}, http.StatusOK)
+	// Group consultations by date
+	var groupedConsultations = make(map[string][]models.Consultation)
+	for _, consultation := range *consultations {
+		groupedConsultations[consultation.Date] = append(groupedConsultations[consultation.Date], consultation)
+	}
+
+	// Sort consultations by date of consultation, in format dd-mm-yyyy
+	// Each element in the array is an object containing the date, and the consultations array for that date
+	var sortedConsultations []api.BookedConsultationsByDate
+	for date, consults := range groupedConsultations {
+		sortedConsultations = append(sortedConsultations, api.BookedConsultationsByDate{Date: date, Consultations: consults})
+	}
+
+	// Sort the array by date
+	sort.Slice(sortedConsultations, func(i, j int) bool {
+		date1, _ := time.Parse("02-01-2006", sortedConsultations[i].Date)
+		date2, _ := time.Parse("02-01-2006", sortedConsultations[j].Date)
+		return date1.Before(date2)
+	})
+
+	res := api.BookedConsultationsResponse{BookedConsultations: sortedConsultations}
+	util.WriteJSON(w, api.Response{Message: "Booked consultations for student fetched successfully!", Data: res}, http.StatusOK)
 }
 
 // func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {

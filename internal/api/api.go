@@ -80,3 +80,12 @@ type MessagesResponse struct {
 type ConsultationsResponse struct {
 	Consultations []models.Consultation `json:"consultations"`
 }
+
+type BookedConsultationsByDate struct {
+	Date string `json:"date"`
+	Consultations []models.Consultation `json:"consultations"`
+}
+
+type BookedConsultationsResponse struct {
+	BookedConsultations []BookedConsultationsByDate `json:"bookedConsultations"`
+}
