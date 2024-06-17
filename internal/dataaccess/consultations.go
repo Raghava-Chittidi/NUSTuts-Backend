@@ -43,34 +43,34 @@ func GetConsultationById(id int) (*models.Consultation, error) {
 	return &consultation, nil
 }
 
-func BookConsultationById(id int, userID int) error {
+func BookConsultationById(id int, userID int) (*models.Consultation, error) {
 	consultation, err := GetConsultationById(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if (consultation.Booked && consultation.StudentID != userID) {
-		return errors.New("This consultation is booked by someone else")
+		return nil, errors.New("This consultation is booked by someone else")
 	}
 
 	consultation.Booked = true
 	consultation.StudentID = userID
 	database.DB.Save(&consultation)
-	return nil
+	return consultation, nil
 }
 
-func UnbookConsultationById(id int, userID int) error {
+func UnbookConsultationById(id int, userID int) (*models.Consultation, error) {
 	consultation, err := GetConsultationById(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if (consultation.StudentID != userID) {
-		return errors.New("You are not authorized to unbook this consultation")
+		return nil, errors.New("You are not authorized to unbook this consultation")
 	}
 
 	consultation.Booked = false
 	consultation.StudentID = 0
 	database.DB.Save(&consultation)
-	return nil
+	return consultation, nil
 }

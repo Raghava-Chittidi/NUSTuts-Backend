@@ -115,7 +115,14 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dataaccess.BookConsultationById(consultationId, userIDInt)
+	consultation, err := dataaccess.BookConsultationById(consultationId, userIDInt)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := *consultation
+	util.WriteJSON(w, api.Response{Message: "Consultation succesfully booked", Data: res}, http.StatusOK)
 }
 
 func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
@@ -133,5 +140,12 @@ func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dataaccess.UnbookConsultationById(consultationId, userIDInt)
+	consultation, err := dataaccess.UnbookConsultationById(consultationId, userIDInt)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := *consultation
+	util.WriteJSON(w, api.Response{Message: "Consultation succesfully cancelled", Data: res}, http.StatusOK)
 }
