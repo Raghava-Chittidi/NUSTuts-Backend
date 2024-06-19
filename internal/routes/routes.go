@@ -23,5 +23,6 @@ func AuthorizedRoutes() func(chi.Router) {
 	return func(r chi.Router) {
 		r.Route("/files", FileRoutes)
 		r.Route("/messages", MessagesRoutes)
+		r.Route("/attendance", AttendanceRoutes)
 	}
 }

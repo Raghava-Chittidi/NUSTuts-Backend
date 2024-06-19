@@ -56,8 +56,9 @@ func AuthoriseUser(h http.Handler) http.Handler {
 			return
 		}
 		
-		// Ensure students cannot access any file routes without "student" inside the route 
-		if privilege == auth.RoleStudent.Privilege && strings.Contains(urlPath, "files") && !strings.Contains(urlPath, "student") {
+		// Ensure students cannot access any files and attendance routes without "student" inside the route 
+		if privilege == auth.RoleStudent.Privilege && (strings.Contains(urlPath, "files") || strings.Contains(urlPath, "attendance")) && 
+				!strings.Contains(urlPath, "student") {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
