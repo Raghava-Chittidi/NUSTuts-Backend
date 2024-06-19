@@ -39,6 +39,15 @@ type CreateMesssagePayload struct {
 	Content string `json:"content"`
 }
 
+type MarkAttendancePayload struct {
+	StudentID int `json:"studentId"`
+	AttendanceCode string `json:"attendanceCode"`
+}
+
+type DeleteAttendanceStringPayload struct {
+	AttendanceCode string `json:"attendanceCode"`
+}
+
 type StudentAuthResponse struct {
 	ID int `json:"id"`
 	Name string `json:"name"`
@@ -75,4 +84,8 @@ type MessageResponse struct {
 
 type MessagesResponse struct {
 	Messages []MessageResponse `json:"messages"`
+}
+
+type AttendanceStringResponse struct {
+	AttendanceCode string `json:"attendanceCode"`
 }
