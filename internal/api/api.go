@@ -97,7 +97,8 @@ type BookedConsultationsByDate struct {
 
 type BookedConsultationsResponse struct {
 	BookedConsultations []BookedConsultationsByDate `json:"bookedConsultations"`
-	
+}
+
 type AttendanceStringResponse struct {
 	AttendanceCode string `json:"attendanceCode"`
 }
