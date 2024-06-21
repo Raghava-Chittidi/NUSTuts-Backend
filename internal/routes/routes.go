@@ -25,5 +25,7 @@ func AuthorizedRoutes() func(chi.Router) {
 		r.Route("/files", FileRoutes)
 		r.Route("/messages", MessagesRoutes)
 		r.Route("/ws", PrivateWebsocketRoutes)
+		r.Route("/consultations", ConsultationsRoutes)
+		r.Route("/attendance", AttendanceRoutes)
 	}
 }
