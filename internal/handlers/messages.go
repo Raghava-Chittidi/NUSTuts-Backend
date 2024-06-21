@@ -33,7 +33,13 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 				return api.MessageResponse{}
 			}
 
-			return api.MessageResponse{Sender: sender.Name, TutorialID: tutorialId, UserType: item.UserType, Content: item.Content}
+			return api.MessageResponse{
+				SenderID: item.SenderID, 
+				Sender: sender.Name, 
+				TutorialID: tutorialId, 
+				UserType: item.UserType, 
+				Content: item.Content,
+			}
 		} else {
 			sender, err := dataaccess.GetTeachingAssistantById(item.SenderID)
 			if err != nil {
@@ -41,9 +47,14 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 				return api.MessageResponse{}
 			}
 
-			return api.MessageResponse{Sender: sender.Name, TutorialID: tutorialId, UserType: item.UserType, Content: item.Content}
+			return api.MessageResponse{
+				SenderID: item.SenderID, 
+				Sender: sender.Name, 
+				TutorialID: tutorialId, 
+				UserType: item.UserType, 
+				Content: item.Content,
+			}
 		}
-
 	})
 	
 	res := api.MessagesResponse{Messages: messagesWithSenders}

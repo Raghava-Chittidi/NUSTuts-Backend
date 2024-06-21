@@ -7,6 +7,7 @@ import (
 func PublicRoutes() func(chi.Router) {
 	return func(r chi.Router) {
 		r.Route("/auth", AuthRoutes)
+		r.Route("/public/ws", PublicWebsocketRoutes)
 	}
 }
 
@@ -23,5 +24,6 @@ func AuthorizedRoutes() func(chi.Router) {
 	return func(r chi.Router) {
 		r.Route("/files", FileRoutes)
 		r.Route("/messages", MessagesRoutes)
+		r.Route("/ws", PrivateWebsocketRoutes)
 	}
 }

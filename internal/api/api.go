@@ -69,6 +69,7 @@ type FilepathResponse struct {
 type MessageResponse struct {
 	TutorialID int `json:"tutorialId"`
 	Sender string `json:"sender"`
+	SenderID int `json:"senderId"`
 	UserType string `json:"userType"`
 	Content string `json:"content"`
 }
