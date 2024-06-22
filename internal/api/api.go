@@ -87,13 +87,24 @@ type MessagesResponse struct {
 	Messages []MessageResponse `json:"messages"`
 }
 
+type ConsultationResponse struct {
+	ID uint `json:"id"`
+	Tutorial models.Tutorial `json:"tutorial"`
+	Student models.Student `json:"student"`
+	TeachingAssistant models.TeachingAssistant `json:"teachingAssistant"`
+	Date string `json:"date"`
+	StartTime string `json:"startTime"`
+	EndTime string `json:"endTime"`
+	Booked bool `json:"booked"`
+}
+
 type ConsultationsResponse struct {
-	Consultations []models.Consultation `json:"consultations"`
+	Consultations []ConsultationResponse `json:"consultations"`
 }
 
 type BookedConsultationsByDate struct {
 	Date string `json:"date"`
-	Consultations []models.Consultation `json:"consultations"`
+	Consultations []ConsultationResponse `json:"consultations"`
 }
 
 type BookedConsultationsResponse struct {
