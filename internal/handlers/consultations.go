@@ -3,7 +3,6 @@ package handlers
 import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/dataaccess"
-	"NUSTuts-Backend/internal/auth"
 	"NUSTuts-Backend/internal/util"
 	"NUSTuts-Backend/internal/models"
 	"net/http"
@@ -45,7 +44,14 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	res := api.ConsultationsResponse{Consultations: *consultations}
+	// Transform the consultations to include student and teaching assistant details
+	consultationsResponse, err := transformConsultationsToConsultationsResponse(consultations)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := api.ConsultationsResponse{Consultations: *consultationsResponse}
 	util.WriteJSON(w, api.Response{Message: "Consultations for tutorial for date fetched successfully!", 
 		Data: res}, http.StatusOK)
 }
@@ -80,7 +86,14 @@ func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	res := getBookedConsultationsResponse(consultations)
+	// Transform the consultations to include student and teaching assistant details
+	consultationsResponse, err := transformConsultationsToConsultationsResponse(consultations)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := getBookedConsultationsResponse(consultationsResponse)
 	util.WriteJSON(w, api.Response{Message: "Booked consultations for TA fetched successfully!", Data: res}, http.StatusOK)
 }
 
@@ -120,14 +133,73 @@ func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.
 		return
 	}
 
-	res := getBookedConsultationsResponse(consultations)
+	// Transform the consultations to include student and teaching assistant details
+	consultationsResponse, err := transformConsultationsToConsultationsResponse(consultations)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := getBookedConsultationsResponse(consultationsResponse)
 	util.WriteJSON(w, api.Response{Message: "Booked consultations for student fetched successfully!", Data: res}, http.StatusOK)
 }
 
+// Transform consultations to include student and teaching assistant details
+func transformConsultationsToConsultationsResponse(consultations *[]models.Consultation) (*[]api.ConsultationResponse, error) {
+	consultationsResponse := make([]api.ConsultationResponse, len(*consultations))
+	for i, consultation := range *consultations {
+		transformedConsultation, err := transformConsultationToConsultationResponse(consultation)
+		if err != nil {
+			return nil, err
+		}
+
+		consultationsResponse[i] = *transformedConsultation
+	}
+
+	return &consultationsResponse, nil
+}
+
+// Get student and teaching assistant details for a consultation
+func transformConsultationToConsultationResponse(consultation models.Consultation) (*api.ConsultationResponse, error) {
+	// Get the student
+	// If studentID is 0, then no student has booked the consultation
+	var student models.Student
+	if consultation.StudentID != 0 {
+		studentPointer, err := dataaccess.GetStudentById(consultation.StudentID)
+		if err != nil {
+			return nil, err
+		}
+		student = *studentPointer
+	} 
+
+	// Get the tutorial
+	tutorial, err := dataaccess.GetTutorialById(consultation.TutorialID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the teaching assistant
+	teachingAssistant, err := dataaccess.GetTeachingAssistantById(tutorial.TeachingAssistantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.ConsultationResponse{
+		ID: consultation.ID,
+		Tutorial: *tutorial,
+		Student: student,
+		TeachingAssistant: *teachingAssistant,
+		Date: consultation.Date,
+		StartTime: consultation.StartTime,
+		EndTime: consultation.EndTime,
+		Booked: consultation.Booked,
+	}, nil
+}
+
 // Returns a response object containing the booked consultations grouped by date
-func getBookedConsultationsResponse(consultations *[]models.Consultation) api.BookedConsultationsResponse {
+func getBookedConsultationsResponse(consultations *[]api.ConsultationResponse) api.BookedConsultationsResponse {
 	// Group consultations by date
-	var groupedConsultations = make(map[string][]models.Consultation)
+	var groupedConsultations = make(map[string][]api.ConsultationResponse)
 	for _, consultation := range *consultations {
 		groupedConsultations[consultation.Date] = append(groupedConsultations[consultation.Date], consultation)
 	}
@@ -185,8 +257,8 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, claims, err := auth.AuthObj.VerifyToken(w, r)
-	userID := claims.Subject // The "sub" claim is typically used for the user ID
+
+	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
@@ -199,7 +271,14 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := *consultation
+	// Transform the consultation to include student and teaching assistant details
+	consultationResponse, err := transformConsultationToConsultationResponse(*consultation)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := *consultationResponse
 	util.WriteJSON(w, api.Response{Message: "Consultation succesfully booked", Data: res}, http.StatusOK)
 }
 
@@ -210,8 +289,7 @@ func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, claims, err := auth.AuthObj.VerifyToken(w, r)
-	userID := claims.Subject // The "sub" claim is typically used for the user ID
+	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
@@ -224,6 +302,13 @@ func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := *consultation
+	// Transform the consultation to include student and teaching assistant details
+	consultationResponse, err := transformConsultationToConsultationResponse(*consultation)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := *consultationResponse
 	util.WriteJSON(w, api.Response{Message: "Consultation succesfully cancelled", Data: res}, http.StatusOK)
 }
