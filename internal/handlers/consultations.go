@@ -3,7 +3,6 @@ package handlers
 import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/dataaccess"
-	"NUSTuts-Backend/internal/auth"
 	"NUSTuts-Backend/internal/util"
 	"NUSTuts-Backend/internal/models"
 	"net/http"
@@ -185,8 +184,8 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, claims, err := auth.AuthObj.VerifyToken(w, r)
-	userID := claims.Subject // The "sub" claim is typically used for the user ID
+
+	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
@@ -210,8 +209,7 @@ func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, claims, err := auth.AuthObj.VerifyToken(w, r)
-	userID := claims.Subject // The "sub" claim is typically used for the user ID
+	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
