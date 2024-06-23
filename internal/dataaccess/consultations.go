@@ -23,6 +23,7 @@ func GetBookedConsultationsForTutorialForTA(tutorialId int, date string, time st
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").Where("tutorial_id = ?", tutorialId).
 			Where("(date = ? AND end_time >= ?) OR (date > ?)", date, time, date).
+			Where("booked = true").
 			Order("date ASC").Order("start_time ASC").Find(&consultations)
 
 	if result.Error != nil {
