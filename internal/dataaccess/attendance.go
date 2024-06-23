@@ -47,6 +47,21 @@ func GetAttendanceByDateAndTutorialID(date string, tutorialId int) (*[]models.At
 	return &attendances, nil
 }
 
+func GetTodayAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
+	date := time.Now().UTC().Format("2006-01-02")
+	return GetAttendanceByDateAndTutorialID(date, tutorialId)
+}
+
+func GetAllAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
+	var attendances []models.Attendance
+	result := database.DB.Table("attendances").Where("tutorial_id = ?", tutorialId).Find(&attendances)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &attendances, nil
+}
+
 func DeleteGeneratedAttendanceString(tutorialId int) error {
 	attendanceString, err := GetAttendanceStringByTutorialID(tutorialId)
 	if err != nil {

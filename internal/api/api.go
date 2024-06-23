@@ -114,3 +114,15 @@ type BookedConsultationsResponse struct {
 type AttendanceStringResponse struct {
 	AttendanceString models.AttendanceString `json:"attendanceString"`
 }
+
+type AttendanceResponse struct {
+	ID uint `json:"id"`
+	Student models.Student `json:"student"`
+	TutorialID int `json:"tutorialId"`
+	Date string `json:"date"`
+	Present bool `json:"present"`
+}
+
+type AttendanceListResponse struct {
+	Attendances []AttendanceResponse `json:"attendances"`
+}

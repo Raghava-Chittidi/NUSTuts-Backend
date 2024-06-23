@@ -3,12 +3,59 @@ package handlers
 import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/dataaccess"
+	"NUSTuts-Backend/internal/models"
 	"NUSTuts-Backend/internal/util"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
+
+func GetAllAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	attendances, err := dataaccess.GetAllAttendanceByTutorialID(tutorialId)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	attendancesResponse, err := transformAttendancesToAttendancesResponse(attendances)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := api.AttendanceListResponse{Attendances: *attendancesResponse}
+	util.WriteJSON(w, api.Response{Message: "Attendance list retrieved successfully!", Data: res}, http.StatusOK)
+}
+
+func GetTodayAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	attendances, err := dataaccess.GetTodayAttendanceByTutorialID(tutorialId)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	attendancesResponse, err := transformAttendancesToAttendancesResponse(attendances)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	res := api.AttendanceListResponse{Attendances: *attendancesResponse}
+	util.WriteJSON(w, api.Response{Message: "Attendance list retrieved successfully!", Data: res}, http.StatusOK)
+}
 
 func GenerateAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
@@ -125,4 +172,35 @@ func VerifyAndMarkStudentAttendance(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	util.WriteJSON(w, api.Response{Message: "Your attendance has been marked successfully!"}, http.StatusOK)
+}
+
+func transformAttendanceToAttendanceResponse(attendance models.Attendance) (*api.AttendanceResponse, error) {
+	student, err := dataaccess.GetStudentById(attendance.StudentID)
+	if err != nil {
+		return nil, err
+	}
+
+	attendanceResponse := api.AttendanceResponse{
+		ID: attendance.ID,
+		Student: *student,
+		TutorialID: attendance.TutorialID,
+		Date: attendance.Date,
+		Present: attendance.Present,
+	}
+
+	return &attendanceResponse, nil
+}
+
+func transformAttendancesToAttendancesResponse(attendances *[]models.Attendance) (*[]api.AttendanceResponse, error) {
+	attendancesResponse := make([]api.AttendanceResponse, len(*attendances))
+	for i, attendance := range *attendances {
+		transformedAttendance, err := transformAttendanceToAttendanceResponse(attendance)
+		if err != nil {
+			return nil, err
+		}
+
+		attendancesResponse[i] = *transformedAttendance
+	}
+
+	return &attendancesResponse, nil
 }
