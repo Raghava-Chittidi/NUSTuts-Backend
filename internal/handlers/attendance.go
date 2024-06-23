@@ -30,7 +30,7 @@ func GetAllAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := api.AttendanceListResponse{Attendances: *attendancesResponse}
+	res := getAttendanceListsByDateResponse(attendancesResponse)
 	util.WriteJSON(w, api.Response{Message: "Attendance list retrieved successfully!", Data: res}, http.StatusOK)
 }
 
@@ -203,4 +203,29 @@ func transformAttendancesToAttendancesResponse(attendances *[]models.Attendance)
 	}
 
 	return &attendancesResponse, nil
+}
+
+// Returns a response object containing the attendance lists grouped by date
+func getAttendanceListsByDateResponse(attendances *[]api.AttendanceResponse) api.AttendanceListsByDateResponse {
+	// Group attendances by date
+	var groupedAttendances = make(map[string][]api.AttendanceResponse)
+	for _, attendance := range *attendances {
+		groupedAttendances[attendance.Date] = append(groupedAttendances[attendance.Date], attendance)
+	}
+
+	// Sort attendances by date of consultation, in format dd-mm-yyyy
+	// Each element in the array is an object containing the date, and the attendances array for that date
+	var sortedAttendances []api.AttendanceListByDate = make([]api.AttendanceListByDate, 0)
+	for date, attendance := range groupedAttendances {
+		sortedAttendances = append(sortedAttendances, api.AttendanceListByDate{Date: date, Attendance: attendance})
+	}
+
+	// // Sort the array by date
+	// sort.Slice(sortedAttendances, func(i, j int) bool {
+	// 	date1, _ := time.Parse("02-01-2006", sortedAttendances[i].Date)
+	// 	date2, _ := time.Parse("02-01-2006", sortedAttendances[j].Date)
+	// 	return date1.Before(date2)
+	// })
+
+	return api.AttendanceListsByDateResponse{AttendanceLists: sortedAttendances}
 }

@@ -126,3 +126,12 @@ type AttendanceResponse struct {
 type AttendanceListResponse struct {
 	Attendances []AttendanceResponse `json:"attendances"`
 }
+
+type AttendanceListByDate struct {
+	Date string `json:"date"`
+	Attendance []AttendanceResponse `json:"attendance"`
+}
+
+type AttendanceListsByDateResponse struct {
+	AttendanceLists []AttendanceListByDate `json:"attendanceLists"`
+}

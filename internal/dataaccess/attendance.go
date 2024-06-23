@@ -39,7 +39,9 @@ func GetAttendanceStringByTutorialID(tutorialId int) (*models.AttendanceString, 
 
 func GetAttendanceByDateAndTutorialID(date string, tutorialId int) (*[]models.Attendance, error) {
 	var attendances []models.Attendance
-	result := database.DB.Table("attendances").Where("date = ?", date).Where("tutorial_id = ?", tutorialId).Find(&attendances)
+	result := database.DB.Table("attendances").Where("date = ?", date).Where("tutorial_id = ?", tutorialId).
+		Order("student_id ASC").
+		Find(&attendances)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -54,7 +56,12 @@ func GetTodayAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error
 
 func GetAllAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
 	var attendances []models.Attendance
-	result := database.DB.Table("attendances").Where("tutorial_id = ?", tutorialId).Find(&attendances)
+	result := database.DB.Table("attendances").
+		Where("tutorial_id = ?", tutorialId).
+		Order("date DESC").
+		Order("student_id ASC").
+		Find(&attendances)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
