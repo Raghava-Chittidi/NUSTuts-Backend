@@ -112,5 +112,5 @@ type BookedConsultationsResponse struct {
 }
 
 type AttendanceStringResponse struct {
-	AttendanceCode string `json:"attendanceCode"`
+	AttendanceString models.AttendanceString `json:"attendanceString"`
 }

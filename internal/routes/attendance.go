@@ -7,7 +7,8 @@ import (
 )
 
 func AttendanceRoutes(r chi.Router) {
-	r.Get("/{tutorialId}", handlers.GenerateAttendanceCodeForTutorial)
+	r.Get("/{tutorialId}", handlers.GetAttendanceCodeForTutorial)
+	r.Get("/{tutorialId}/generate", handlers.GenerateAttendanceCodeForTutorial)
 	r.Post("/{tutorialId}/delete", handlers.DeleteAttendanceString)
 	r.Post("/student/{tutorialId}/mark", handlers.VerifyAndMarkStudentAttendance)
 }

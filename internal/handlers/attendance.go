@@ -41,8 +41,36 @@ func GenerateAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code := api.AttendanceStringResponse{AttendanceCode: attendanceString.Code}
-	util.WriteJSON(w, api.Response{Message: "Code generated successfully!", Data: code}, http.StatusCreated)
+	attendanceStringResponse := api.AttendanceStringResponse{AttendanceString: *attendanceString}
+	util.WriteJSON(w, api.Response{Message: "Code generated successfully!", Data: attendanceStringResponse}, http.StatusCreated)
+}
+
+func GetAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	attendanceString, err := dataaccess.GetAttendanceStringByTutorialID(tutorialId)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	attendanceStringExpired, err := dataaccess.VerifyAttendanceCode(tutorialId, attendanceString.Code)
+	if err != nil {
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	if attendanceStringExpired {
+		util.WriteJSON(w, api.Response{Message: "Code has expired!", Data: nil}, http.StatusNotFound)
+		return
+	}
+		
+	attendanceStringResponse := api.AttendanceStringResponse{AttendanceString: *attendanceString}
+	util.WriteJSON(w, api.Response{Message: "Code retrieved successfully!", Data: attendanceStringResponse}, http.StatusOK)
 }
 
 func DeleteAttendanceString(w http.ResponseWriter, r *http.Request) {
