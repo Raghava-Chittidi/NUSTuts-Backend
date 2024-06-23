@@ -19,14 +19,14 @@ func GenerateAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 
 	err = dataaccess.DeleteGeneratedAttendanceString(tutorialId)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusInternalServerError)
-		return
+		// util.ErrorJSON(w, err, http.StatusInternalServerError)
+		// return
 	}
 	
 	err = dataaccess.DeleteTodayAttendanceByTutorialID(tutorialId)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusInternalServerError)
-		return
+		// util.ErrorJSON(w, err, http.StatusInternalServerError)
+		// return
 	}
 	
 	err = dataaccess.GenerateTodayAttendanceByTutorialID(tutorialId)
@@ -58,14 +58,14 @@ func GetAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attendanceStringExpired, err := dataaccess.VerifyAttendanceCode(tutorialId, attendanceString.Code)
+	attendanceStringNotExpired, err := dataaccess.VerifyAttendanceCode(tutorialId, attendanceString.Code)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	if attendanceStringExpired {
-		util.WriteJSON(w, api.Response{Message: "Code has expired!", Data: nil}, http.StatusNotFound)
+	if !attendanceStringNotExpired {
+		util.WriteJSON(w, api.Response{Message: "Code has expired!", Data: nil}, http.StatusOK)
 		return
 	}
 		
