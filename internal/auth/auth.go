@@ -9,16 +9,15 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 var AuthObj Auth
 
 func InitialiseAuthObj() error {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		return err
-	}
+	// err := godotenv.Load("../../.env")
+	// if err != nil {
+	// 	return err
+	// }
 	
 	AuthObj = Auth{
 		AccessTokenExpiry: time.Minute * 15,
