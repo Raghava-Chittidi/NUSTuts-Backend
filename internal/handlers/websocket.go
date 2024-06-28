@@ -5,6 +5,7 @@ import (
 	"NUSTuts-Backend/internal/util"
 	"NUSTuts-Backend/internal/websockets"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -18,7 +19,9 @@ var Upgrader = websocket.Upgrader {
 	CheckOrigin: func(r *http.Request) bool {
 		// Host check
 		origin := r.Header.Get("origin")
-		return origin == "http://localhost:5173"
+		// godotenv.Load("../../.env")
+		clientUrl := os.Getenv("CLIENT_URL")
+		return origin == clientUrl
 	},
 }
 
