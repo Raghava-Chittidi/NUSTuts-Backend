@@ -39,7 +39,43 @@ func GetAttendanceStringByTutorialID(tutorialId int) (*models.AttendanceString, 
 
 func GetAttendanceByDateAndTutorialID(date string, tutorialId int) (*[]models.Attendance, error) {
 	var attendances []models.Attendance
-	result := database.DB.Table("attendances").Where("date = ?", date).Where("tutorial_id = ?", tutorialId).Find(&attendances)
+	result := database.DB.Table("attendances").Where("date = ?", date).Where("tutorial_id = ?", tutorialId).
+		Order("student_id ASC").
+		Find(&attendances)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &attendances, nil
+}
+
+func GetTodayAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
+	date := time.Now().UTC().Format("2006-01-02")
+	return GetAttendanceByDateAndTutorialID(date, tutorialId)
+}
+
+func GetAllAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
+	var attendances []models.Attendance
+	result := database.DB.Table("attendances").
+		Where("tutorial_id = ?", tutorialId).
+		Order("date DESC").
+		Order("student_id ASC").
+		Find(&attendances)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &attendances, nil
+}
+
+func GetStudentAttendance(tutorialId int, studentId int) (*[]models.Attendance, error) {
+	var attendances []models.Attendance
+	result := database.DB.Table("attendances").Where("tutorial_id = ?", tutorialId).
+		Where("student_id = ?", studentId).
+		Order("date DESC").
+		Find(&attendances)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -109,7 +145,9 @@ func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 
 func MarkPresent(studentId int, tutorialId int) error {
 	var attendance models.Attendance
-	result := database.DB.Table("attendances").Where("student_id = ", studentId).Where("tutorial_id = ?", tutorialId).First(&attendance)
+	date := time.Now().UTC().Format("2006-01-02")
+	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
+			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -117,4 +155,15 @@ func MarkPresent(studentId int, tutorialId int) error {
 	attendance.Present = true
 	database.DB.Table("attendances").Save(attendance)
 	return nil
+}
+
+func GetTodayAttendanceByStudentId(studentId int, tutorialId int) (*models.Attendance, error) {
+	var attendance models.Attendance
+	date := time.Now().UTC().Format("2006-01-02")
+	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
+			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &attendance, nil
 }
