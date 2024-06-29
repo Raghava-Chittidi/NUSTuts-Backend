@@ -7,9 +7,30 @@ import (
 	"NUSTuts-Backend/internal/util"
 	"net/http"
 	"strconv"
-
 	"github.com/go-chi/chi/v5"
 )
+
+func CheckStudentAttendance(w http.ResponseWriter, r *http.Request) {
+	tutorial_id, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	student_id, err := strconv.Atoi(chi.URLParam(r, "studentId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	attendance, err := dataaccess.GetTodayAttendanceByStudentId(student_id, tutorial_id)
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	util.WriteJSON(w, api.Response{Message: "Attendance record found!", Data: attendance.Present}, http.StatusOK)
+}
 
 func GetAllAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
@@ -169,9 +190,10 @@ func VerifyAndMarkStudentAttendance(w http.ResponseWriter, r *http.Request) {
 			util.ErrorJSON(w, err, http.StatusInternalServerError)
 			return
 		}
+		util.WriteJSON(w, api.Response{Message: "Your attendance has been marked successfully!"}, http.StatusOK)
 	}
 	
-	util.WriteJSON(w, api.Response{Message: "Your attendance has been marked successfully!"}, http.StatusOK)
+	util.WriteJSON(w, api.Response{Message: "Invalid code!", Data: nil}, http.StatusOK)
 }
 
 func transformAttendanceToAttendanceResponse(attendance models.Attendance) (*api.AttendanceResponse, error) {
