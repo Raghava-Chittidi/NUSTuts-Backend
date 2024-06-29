@@ -7,6 +7,8 @@ import (
 	"NUSTuts-Backend/internal/util"
 	"net/http"
 	"strconv"
+	"time"
+	"sort"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -265,12 +267,12 @@ func getAttendanceListsByDateResponse(attendances *[]api.AttendanceResponse) api
 		sortedAttendances = append(sortedAttendances, api.AttendanceListByDate{Date: date, Attendance: attendance})
 	}
 
-	// // Sort the array by date
-	// sort.Slice(sortedAttendances, func(i, j int) bool {
-	// 	date1, _ := time.Parse("02-01-2006", sortedAttendances[i].Date)
-	// 	date2, _ := time.Parse("02-01-2006", sortedAttendances[j].Date)
-	// 	return date1.Before(date2)
-	// })
+	// // Sort the array by date in descending order
+	sort.Slice(sortedAttendances, func(i, j int) bool {
+		date1, _ := time.Parse("02-01-2006", sortedAttendances[i].Date)
+		date2, _ := time.Parse("02-01-2006", sortedAttendances[j].Date)
+		return date1.After(date2)
+	})
 
 	return api.AttendanceListsByDateResponse{AttendanceLists: sortedAttendances}
 }
