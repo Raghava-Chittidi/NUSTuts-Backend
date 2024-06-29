@@ -10,20 +10,43 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+func GetStudentAttendance(w http.ResponseWriter, r *http.Request) {
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	studentAttendance, err := dataaccess.GetStudentAttendance(tutorialId, studentId)
+	if err != nil {
+		util.ErrorJSON(w, err)
+		return
+	}
+
+	res := api.StudentAttendanceResponse{Attendance: *studentAttendance}
+	util.WriteJSON(w, api.Response{Message: "Student attendance retrieved successfully!", Data: res}, http.StatusOK)
+}
+
 func CheckStudentAttendance(w http.ResponseWriter, r *http.Request) {
-	tutorial_id, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
+	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	student_id, err := strconv.Atoi(chi.URLParam(r, "studentId"))
+	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return
 	}
 
-	attendance, err := dataaccess.GetTodayAttendanceByStudentId(student_id, tutorial_id)
+	attendance, err := dataaccess.GetTodayAttendanceByStudentId(studentId, tutorialId)
 	if err != nil {
 		util.ErrorJSON(w, err)
 		return

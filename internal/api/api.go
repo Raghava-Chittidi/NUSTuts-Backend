@@ -135,3 +135,7 @@ type AttendanceListByDate struct {
 type AttendanceListsByDateResponse struct {
 	AttendanceLists []AttendanceListByDate `json:"attendanceLists"`
 }
+
+type StudentAttendanceResponse struct {
+	Attendance []models.Attendance `json:"attendance"`
+}

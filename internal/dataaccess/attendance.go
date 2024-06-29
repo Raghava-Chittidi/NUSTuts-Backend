@@ -69,6 +69,20 @@ func GetAllAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) 
 	return &attendances, nil
 }
 
+func GetStudentAttendance(tutorialId int, studentId int) (*[]models.Attendance, error) {
+	var attendances []models.Attendance
+	result := database.DB.Table("attendances").Where("tutorial_id = ?", tutorialId).
+		Where("student_id = ?", studentId).
+		Order("date DESC").
+		Find(&attendances)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &attendances, nil
+}
+
 func DeleteGeneratedAttendanceString(tutorialId int) error {
 	attendanceString, err := GetAttendanceStringByTutorialID(tutorialId)
 	if err != nil {
