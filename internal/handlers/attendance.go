@@ -269,10 +269,10 @@ func getAttendanceListsByDateResponse(attendances *[]api.AttendanceResponse) api
 
 	// // Sort the array by date in descending order
 	sort.Slice(sortedAttendances, func(i, j int) bool {
-		date1, _ := time.Parse("02-01-2006", sortedAttendances[i].Date)
-		date2, _ := time.Parse("02-01-2006", sortedAttendances[j].Date)
+		date1, _ := time.Parse("2006-01-02", sortedAttendances[i].Date)
+		date2, _ := time.Parse("2006-01-02", sortedAttendances[j].Date)
 		return date1.After(date2)
 	})
-
+	
 	return api.AttendanceListsByDateResponse{AttendanceLists: sortedAttendances}
 }
