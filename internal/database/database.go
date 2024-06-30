@@ -17,7 +17,7 @@ func Connect(isTestDb ...bool) error {
 		log.Fatalln("Failed to load env file!")
 		return err
 	}
-
+  
 	var dbUrl string
 	if len(isTestDb) > 0 && isTestDb[0] {
 		dbUrl = os.Getenv("TEST_DB_URL")

@@ -112,5 +112,30 @@ type BookedConsultationsResponse struct {
 }
 
 type AttendanceStringResponse struct {
-	AttendanceCode string `json:"attendanceCode"`
+	AttendanceString models.AttendanceString `json:"attendanceString"`
+}
+
+type AttendanceResponse struct {
+	ID uint `json:"id"`
+	Student models.Student `json:"student"`
+	TutorialID int `json:"tutorialId"`
+	Date string `json:"date"`
+	Present bool `json:"present"`
+}
+
+type AttendanceListResponse struct {
+	Attendances []AttendanceResponse `json:"attendances"`
+}
+
+type AttendanceListByDate struct {
+	Date string `json:"date"`
+	Attendance []AttendanceResponse `json:"attendance"`
+}
+
+type AttendanceListsByDateResponse struct {
+	AttendanceLists []AttendanceListByDate `json:"attendanceLists"`
+}
+
+type StudentAttendanceResponse struct {
+	Attendance []models.Attendance `json:"attendance"`
 }
