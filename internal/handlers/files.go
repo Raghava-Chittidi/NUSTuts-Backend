@@ -5,6 +5,7 @@ import (
 	"NUSTuts-Backend/internal/dataaccess"
 	"NUSTuts-Backend/internal/models"
 	"NUSTuts-Backend/internal/util"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -22,6 +23,11 @@ func GetAllTutorialFilesForTAs(w http.ResponseWriter, r *http.Request) {
 	week, err := strconv.Atoi(chi.URLParam(r, "week"))
 	if err != nil {
 		util.ErrorJSON(w, err)
+		return
+	}
+
+	if week < 1 || week > 13 {
+		util.ErrorJSON(w, errors.New("invalid week"))
 		return
 	}
 
@@ -45,6 +51,11 @@ func GetAllTutorialFilesForStudents(w http.ResponseWriter, r *http.Request) {
 	week, err := strconv.Atoi(chi.URLParam(r, "week"))
 	if err != nil {
 		util.ErrorJSON(w, err)
+		return
+	}
+
+	if week < 1 || week > 13 {
+		util.ErrorJSON(w, errors.New("invalid week"))
 		return
 	}
 
@@ -76,6 +87,11 @@ func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if payload.Week < 1 || payload.Week > 13 {
+		util.ErrorJSON(w, errors.New("invalid week"))
+		return
+	}
+
 	err = dataaccess.CheckIfNameExistsForTutorialIDAndWeek(tutorialId, payload.Name, payload.Week)
 	if err != nil {
 		util.ErrorJSON(w, err)
@@ -98,7 +114,6 @@ func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
 		util.ErrorJSON(w, err)
 		return
 	}
-
 
 	err = dataaccess.DeleteTutorialFileByFilepath(payload.Filepath)
 	if err != nil {
