@@ -30,3 +30,17 @@ func GetTeachingAssistantByEmail(email string) (*models.TeachingAssistant, error
 
 	return &teachingAssistant, nil
 }
+
+func DeleteTeachingAssistantById(id int) error {
+	teachingAssistant, err := GetTeachingAssistantById(id)
+	if err != nil {
+		return err
+	}
+
+	result := database.DB.Table("teaching_assistants").Delete(&teachingAssistant)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}

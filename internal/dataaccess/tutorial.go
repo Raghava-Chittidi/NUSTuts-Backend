@@ -194,3 +194,17 @@ func CheckIfTeachingAssistantInTutorialById(teachingAssistantId int, tutorialId 
 
 	return true, nil
 }
+
+func DeleteTutorialById(id int) error {
+	tutorial, err := GetTutorialById(id)
+	if err != nil {
+		return err
+	}
+
+	result := database.DB.Table("tutorials").Delete(&tutorial)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
