@@ -208,3 +208,17 @@ func DeleteTutorialById(id int) error {
 
 	return nil
 }
+
+func DeleteTutorialByClassAndModuleCode(classNo string, moduleCode string) error {
+	tutorial, err := GetTutorialByClassAndModuleCode(classNo, moduleCode)
+	if err != nil {
+		return err
+	}
+
+	result := database.DB.Unscoped().Table("tutorials").Delete(&tutorial)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}

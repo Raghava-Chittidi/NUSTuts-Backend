@@ -8,7 +8,6 @@ import (
 	"NUSTuts-Backend/internal/models"
 	"NUSTuts-Backend/internal/util"
 	"errors"
-	"log"
 	"net/http"
 	"net/mail"
 
@@ -37,7 +36,6 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 
 	_, err = mail.ParseAddress(payload.Email)
 	if err != nil {
-		log.Println(err)
 		util.ErrorJSON(w, errors.New("invalid email"), http.StatusBadRequest)
 		return
 	}

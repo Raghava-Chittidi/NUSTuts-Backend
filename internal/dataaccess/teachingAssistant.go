@@ -44,3 +44,17 @@ func DeleteTeachingAssistantById(id int) error {
 
 	return nil
 }
+
+func DeleteTeachingAssistantByEmail(email string) error {
+	teachingAssistant, err := GetTeachingAssistantByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	result := database.DB.Unscoped().Table("teaching_assistants").Delete(&teachingAssistant)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
