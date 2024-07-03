@@ -28,3 +28,17 @@ func setupRoutes(r chi.Router) {
 		})
 	})
 }
+
+func TestSetup() chi.Router {
+	r := chi.NewRouter()
+	setupTestRoutes(r)
+	return r
+}
+
+func setupTestRoutes(r chi.Router) {
+	r.Route("/api", func(r chi.Router) {
+		r.Group(routes.PublicRoutes())
+		r.Group(routes.ProtectedRoutes())
+		r.Group(routes.AuthorizedRoutes())
+	})
+}

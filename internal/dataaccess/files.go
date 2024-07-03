@@ -72,7 +72,7 @@ func DeleteTutorialFileByFilepath(filepath string) (error) {
 		return err
 	}
 
-	result := database.DB.Table("tutorial_files").Delete(&tutorialFile)
+	result := database.DB.Unscoped().Table("tutorial_files").Delete(&tutorialFile)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -108,7 +108,7 @@ func DeleteTutorialFileById(id int) error {
 		return err
 	}
 
-	result := database.DB.Table("tutorials").Unscoped().Delete(&tutorialFile)
+	result := database.DB.Table("tutorials").Delete(&tutorialFile)
 	if result.Error != nil {
 		return result.Error
 	}

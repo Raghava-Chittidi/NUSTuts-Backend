@@ -24,7 +24,10 @@ func Connect(isTestDb ...bool) error {
 		dbUrl = os.Getenv("DB_URL")
 	}
 
-	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN: dbUrl,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 	if err != nil {
 		log.Fatalln("Failed to connect to database!")
 		return err
