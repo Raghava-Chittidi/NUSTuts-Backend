@@ -13,6 +13,7 @@ import (
 	"github.com/samber/lo"
 )
 
+// Fetches all tutorial files for TAs
 func GetAllTutorialFilesForTAs(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -41,6 +42,7 @@ func GetAllTutorialFilesForTAs(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Tutorial Files fetched successfully!", Data: res}, http.StatusOK)
 }
 
+// Fetches all tutorial files for students
 func GetAllTutorialFilesForStudents(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -73,6 +75,7 @@ func GetAllTutorialFilesForStudents(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Tutorial Files fetched successfully!", Data: res}, http.StatusOK)
 }
 
+// Called when TA uploads a new file
 func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -107,6 +110,7 @@ func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "File uploaded successfully!"}, http.StatusCreated)
 }
 
+// Called when TA deletes a file
 func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
 	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
@@ -124,6 +128,7 @@ func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Filepath removed from table successfully!"}, http.StatusOK)
 }
 
+// Called when TA privates a file
 func PrivateFile(w http.ResponseWriter, r *http.Request) {
 	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
@@ -141,6 +146,7 @@ func PrivateFile(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "File privated successfully!"}, http.StatusOK)
 }
 
+// Called when TA unprivates a file
 func UnprivateFile(w http.ResponseWriter, r *http.Request) {
 	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
