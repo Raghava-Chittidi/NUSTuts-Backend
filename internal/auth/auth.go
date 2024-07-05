@@ -128,6 +128,10 @@ func (a *Auth) VerifyToken(w http.ResponseWriter, r *http.Request) (string, *Cla
 		return []byte(a.Secret), nil
 	})
 
+	// log.Default().Print("Token: ", token)
+	// log.Default().Println("Issued at ", claims.IssuedAt)
+	// log.Default().Println("Expires at ", claims.ExpiresAt)
+
 	if err != nil {
 		return "", nil, err
 	}

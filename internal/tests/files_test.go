@@ -50,7 +50,7 @@ func TestValidUploadFilepath(t *testing.T) {
 		assert.NoError(t, err)
 	
 		// Send a request to the upload file api endpoint
-		_, status, err := CreateMockRequest(uploadFilePayload, fmt.Sprintf("/api/files/upload/%d", int(testTutorial.ID)), "POST")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(uploadFilePayload, fmt.Sprintf("/api/files/upload/%d", int(testTutorial.ID)), "POST", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, status)
 	
@@ -77,7 +77,7 @@ func TestInvalidWeekUploadFilepath(t *testing.T) {
 		assert.NoError(t, err)
 	
 		// Send a request to the upload file api endpoint
-		_, status, err := CreateMockRequest(uploadFilePayload, fmt.Sprintf("/api/files/upload/%d", int(testTutorial.ID)), "POST")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(uploadFilePayload, fmt.Sprintf("/api/files/upload/%d", int(testTutorial.ID)), "POST", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, status)
 	
@@ -104,7 +104,7 @@ func TestValidDeleteFilepath(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Send a request to the delete file api endpoint
-		_, status, err := CreateMockRequest(api.FilepathPayload{Filepath: uploadFilePayload.Filepath}, fmt.Sprintf("/api/files/delete/%d", int(testTutorial.ID)), "PATCH")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: uploadFilePayload.Filepath}, fmt.Sprintf("/api/files/delete/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, status)
 	
@@ -131,7 +131,7 @@ func TestInvalidFilepathDeleteFilepath(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Send a request to the delete file api endpoint
-		_, status, err := CreateMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/delete/%d", int(testTutorial.ID)), "PATCH")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/delete/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, status)
 	
@@ -162,7 +162,7 @@ func TestValidPrivateFile(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Send a request to the private file api endpoint
-		_, status, err := CreateMockRequest(api.FilepathPayload{Filepath: uploadFilePayload.Filepath}, fmt.Sprintf("/api/files/private/%d", int(testTutorial.ID)), "PATCH")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: uploadFilePayload.Filepath}, fmt.Sprintf("/api/files/private/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, status)
 	
@@ -193,7 +193,7 @@ func TestInvalidFilepathPrivateFile(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Send a request to the private file api endpoint
-		_, status, err := CreateMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/private/%d", int(testTutorial.ID)), "PATCH")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/private/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, status)
 	
@@ -229,7 +229,7 @@ func TestValidUnprivateFile(t *testing.T) {
 		database.DB.Save(tutorialFile)
 		
 		// Send a request to the private file api endpoint
-		_, status, err := CreateMockRequest(api.FilepathPayload{Filepath: uploadFilePayload.Filepath}, fmt.Sprintf("/api/files/unprivate/%d", int(testTutorial.ID)), "PATCH")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: uploadFilePayload.Filepath}, fmt.Sprintf("/api/files/unprivate/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, status)
 	
@@ -265,7 +265,7 @@ func TestInvalidFilepathUnprivateFile(t *testing.T) {
 		database.DB.Save(tutorialFile)
 
 		// Send a request to the unprivate file api endpoint
-		_, status, err := CreateMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/unprivate/%d", int(testTutorial.ID)), "PATCH")
+		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/unprivate/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, status)
 	
