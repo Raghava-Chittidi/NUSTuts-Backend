@@ -66,7 +66,7 @@ func BookConsultationById(id int, userID int) (*models.Consultation, error) {
 	}
 
 	if (consultation.Booked && consultation.StudentID != userID) {
-		return nil, errors.New("This consultation is booked by someone else")
+		return nil, errors.New("this consultation is booked by someone else")
 	}
 
 	consultation.Booked = true
@@ -82,7 +82,7 @@ func UnbookConsultationById(id int, userID int) (*models.Consultation, error) {
 	}
 
 	if (consultation.StudentID != userID) {
-		return nil, errors.New("You are not authorized to unbook this consultation")
+		return nil, errors.New("you are not authorized to unbook this consultation")
 	}
 
 	consultation.Booked = false

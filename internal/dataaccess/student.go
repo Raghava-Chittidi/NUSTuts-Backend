@@ -5,10 +5,10 @@ import (
 	"NUSTuts-Backend/internal/models"
 )
 
-func CreateStudent(name string, email string, password string, modules []string) error {
+func CreateStudent(name string, email string, password string, modules []string) (*models.Student, error) {
 	student := &models.Student{Name: name, Email: email, Password: password, Modules: modules}
 	result := database.DB.Table("students").Create(student)
-	return result.Error
+	return student, result.Error
 }
 
 func GetStudentById(id int) (*models.Student, error) {
@@ -31,12 +31,16 @@ func GetStudentByEmail(email string) (*models.Student, error) {
 	return &student, nil
 }
 
-// func GetPreloadedStudentById(id int) (*models.Student, error) {
-// 	var student models.Student
-// 	result := database.DB.Table("students").Preload("Tutorials").Where("id = ?", id).First(&student)
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
+func DeleteStudentByEmail(email string) error {
+	student, err := GetStudentByEmail(email)
+	if err != nil {
+		return err
+	}
 
-// 	return &student, nil
-// }
+	result := database.DB.Unscoped().Table("students").Delete(&student)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
