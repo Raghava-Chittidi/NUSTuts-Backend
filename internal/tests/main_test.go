@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-var TestRouter = router.TestSetup()
+var TestRouter = router.Setup()
 
 func TestMain(m *testing.M) {
 	err := database.Connect(true)
@@ -28,6 +28,11 @@ func TestMain(m *testing.M) {
 	// if err != nil {
 	// 	log.Fatalln(err)
 	// }
+	// Initialise auth obj
+	err = auth.InitialiseAuthObj()
+	if err != nil {
+		log.Fatalln("Failed to initialise auth obj!", err)
+	}
 
 	// Initialise auth obj
 	err = auth.InitialiseAuthObj()

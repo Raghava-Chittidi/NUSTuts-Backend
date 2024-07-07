@@ -3,12 +3,12 @@ package handlers
 import (
 	"NUSTuts-Backend/internal/api"
 	"NUSTuts-Backend/internal/dataaccess"
-	"NUSTuts-Backend/internal/util"
 	"NUSTuts-Backend/internal/models"
+	"NUSTuts-Backend/internal/util"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
-	"sort"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -23,7 +23,7 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 	consultDate := r.URL.Query().Get("date")
 
 	// Check if date is in the correct format
-	_, err = time.Parse("02-01-2006", consultDate)
+	_, err = time.Parse("2006-01-02", consultDate)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
@@ -67,7 +67,7 @@ func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Reque
 	timeParam := r.URL.Query().Get("time")
 
 	// Check if date is in the correct format
-	_, err = time.Parse("02-01-2006", dateParam)
+	_, err = time.Parse("2006-01-02", dateParam)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
@@ -114,7 +114,7 @@ func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.
 	timeParam := r.URL.Query().Get("time")
 
 	// Check if date is in the correct format
-	_, err = time.Parse("02-01-2006", dateParam)
+	_, err = time.Parse("2006-01-02", dateParam)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
@@ -213,8 +213,8 @@ func getBookedConsultationsResponse(consultations *[]api.ConsultationResponse) a
 
 	// Sort the array by date
 	sort.Slice(sortedConsultations, func(i, j int) bool {
-		date1, _ := time.Parse("02-01-2006", sortedConsultations[i].Date)
-		date2, _ := time.Parse("02-01-2006", sortedConsultations[j].Date)
+		date1, _ := time.Parse("2006-01-02", sortedConsultations[i].Date)
+		date2, _ := time.Parse("2006-01-02", sortedConsultations[j].Date)
 		return date1.Before(date2)
 	})
 
