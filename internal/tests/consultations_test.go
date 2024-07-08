@@ -161,3 +161,59 @@ func TestValidBookConsultation(t *testing.T) {
 		}
 	}
 }
+
+// Test valid cancel consultation for student
+func TestValidCancelConsultation(t *testing.T) {
+	// Test for 10 dates in the future
+	for i := 1; i <= 5; i++ {
+		// Create test TeachingAssistant, Student, Tutorial
+		testStudent, _, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		assert.NoError(t, err)
+		// Get date string for day after tomorrow
+		date := time.Now().AddDate(0, 0, i).Format("2006-01-02")
+
+		// Send a request to get consulations for the tutorial on the date
+		res, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", testStudent)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, status)
+
+		// Get response in json
+		var response api.Response
+		err = json.Unmarshal(res, &response)
+		assert.NoError(t, err)
+		resData, _ := json.Marshal(response.Data)
+
+		// Get actual consultations for the tutorial on the date
+		var consultationsForTutorialForDate api.ConsultationsResponse
+		err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+		assert.NoError(t, err)
+		actualConsultationsForTutorialForDate := consultationsForTutorialForDate.Consultations
+
+		for _, consultation := range actualConsultationsForTutorialForDate {
+			// Send a request to the book consultation
+			_, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/book/%d?userId=%d", int(testTutorial.ID),
+				int(consultation.ID), int(testStudent.ID)), "PUT", testStudent)
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, status)
+			consultation, err := dataaccess.GetConsultationById(int(consultation.ID))
+			assert.NoError(t, err)
+			assert.True(t, consultation.Booked)
+
+			// Send a request to the cancel consultation
+			_, status, err = CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/cancel/%d?userId=%d", int(testTutorial.ID),
+				int(consultation.ID), int(testStudent.ID)), "PUT", testStudent)
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, status)
+			consultation, err = dataaccess.GetConsultationById(int(consultation.ID))
+			assert.NoError(t, err)
+			assert.False(t, consultation.Booked)
+		}
+
+		// Clean up
+		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		// Clear consultations in actualConsultationsForTutorialForDate
+		for _, consultation := range actualConsultationsForTutorialForDate {
+			dataaccess.DeleteConsultationById(int(consultation.ID))
+		}
+	}
+}
