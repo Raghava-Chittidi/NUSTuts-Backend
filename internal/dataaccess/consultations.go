@@ -6,6 +6,16 @@ import (
 	"errors"
 )
 
+// DeleteConsultationById deletes a consultation by its id
+func DeleteConsultationById(id int) error {
+	result := database.DB.Table("consultations").Where("id = ?", id).Delete(&models.Consultation{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func GetAllConsultationsForTutorialForDate(tutorialId int, date string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").

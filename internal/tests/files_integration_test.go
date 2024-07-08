@@ -13,23 +13,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testTeachingAssistant = models.TeachingAssistant{
-	Name: "test_ta",
-	Email: "test_ta@gmail.com",
-	Password: "test_ta",
-}
+// var testTeachingAssistant = models.TeachingAssistant{
+// 	Name: "test_ta",
+// 	Email: "test_ta@gmail.com",
+// 	Password: "test_ta",
+// }
 
-var testStudent = models.Student{
-	Name: "test_student",
-	Email: "test_student@gmail.com",
-	Password: "test_student",
-	Modules: []string{"test_CS1101S"},
-}
+// var testStudent = models.Student{
+// 	Name: "test_student",
+// 	Email: "test_student@gmail.com",
+// 	Password: "test_student",
+// 	Modules: []string{"test_CS1101S"},
+// }
 
-var testTutorial = models.Tutorial{
-	TutorialCode: "123456",
-	Module: "test_CS1101S",
-}
+// var testTutorial = models.Tutorial{
+// 	TutorialCode: "123456",
+// 	Module: "test_CS1101S",
+// }
 
 var validFilesTests = []api.UploadFilePayload{
 	{Name: "test_filename1", Week: 1, Filepath: "test_filepath1"},
@@ -56,20 +56,20 @@ func TestValidUploadFilepath(t *testing.T) {
 	for i, filePayload := range validFilesTests {
 		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
-	
+
 		// Send a request to the upload file api endpoint
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(filePayload, fmt.Sprintf("/api/files/upload/%d", int(testTutorial.ID)), "POST", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, status)
-	
+
 		// Get the actual tutorial file that is created
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.NoError(t, err)
-	
+
 		// Compare expected tutorial file that should be created with the actual file created
 		expectedTutorialFile := &models.TutorialFile{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[i].Filepath, Name: validFilesTests[i].Name, Visible: true, Week: validFilesTests[i].Week}
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
@@ -82,17 +82,17 @@ func TestInvalidWeekUploadFilepath(t *testing.T) {
 		// Create test Student, TA and Tutorial
 		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
-	
+
 		// Send a request to the upload file api endpoint
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(filePayload, fmt.Sprintf("/api/files/upload/%d", int(testTutorial.ID)), "POST", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, status)
-	
+
 		// Get the actual tutorial file that is created
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.Error(t, err)
 		assert.Nil(t, tutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 	}
@@ -113,12 +113,12 @@ func TestValidDeleteFilepath(t *testing.T) {
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: filePayload.Filepath}, fmt.Sprintf("/api/files/delete/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, status)
-	
+
 		// Get the tutorial file
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.Error(t, err)
 		assert.Nil(t, tutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 	}
@@ -139,7 +139,7 @@ func TestInvalidFilepathDeleteFilepath(t *testing.T) {
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/delete/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, status)
-	
+
 		// Get the tutorial file that should not have been deleted due to invalid path
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.NoError(t, err)
@@ -147,7 +147,7 @@ func TestInvalidFilepathDeleteFilepath(t *testing.T) {
 		// Compare expected tutorial file that should be created with the actual file created
 		expectedTutorialFile := &models.TutorialFile{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[i].Filepath, Name: validFilesTests[i].Name, Visible: true, Week: validFilesTests[i].Week}
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
@@ -169,7 +169,7 @@ func TestValidPrivateFile(t *testing.T) {
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: filePayload.Filepath}, fmt.Sprintf("/api/files/private/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, status)
-	
+
 		// Get the tutorial file
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.NoError(t, err)
@@ -177,7 +177,7 @@ func TestValidPrivateFile(t *testing.T) {
 		// Compare expected tutorial file that should be created with the actual file created
 		expectedTutorialFile := &models.TutorialFile{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[i].Filepath, Name: validFilesTests[i].Name, Visible: false, Week: validFilesTests[i].Week}
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
@@ -199,7 +199,7 @@ func TestInvalidFilepathPrivateFile(t *testing.T) {
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/private/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, status)
-	
+
 		// Get the tutorial file
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.NoError(t, err)
@@ -207,7 +207,7 @@ func TestInvalidFilepathPrivateFile(t *testing.T) {
 		// Compare expected tutorial file that should be created with the actual file created
 		expectedTutorialFile := &models.TutorialFile{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[i].Filepath, Name: validFilesTests[i].Name, Visible: true, Week: validFilesTests[i].Week}
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
@@ -229,12 +229,12 @@ func TestValidUnprivateFile(t *testing.T) {
 		assert.NoError(t, err)
 		tutorialFile.Visible = false
 		database.DB.Save(tutorialFile)
-		
+
 		// Send a request to the private file api endpoint
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: filePayload.Filepath}, fmt.Sprintf("/api/files/unprivate/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, status)
-	
+
 		// Get the tutorial file
 		actualTutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.NoError(t, err)
@@ -242,7 +242,7 @@ func TestValidUnprivateFile(t *testing.T) {
 		// Compare expected tutorial file that should be created with the actual file created
 		expectedTutorialFile := &models.TutorialFile{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[i].Filepath, Name: validFilesTests[i].Name, Visible: true, Week: validFilesTests[i].Week}
 		assertEqualTutorialFile(t, expectedTutorialFile, actualTutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
@@ -269,7 +269,7 @@ func TestInvalidFilepathUnprivateFile(t *testing.T) {
 		_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(api.FilepathPayload{Filepath: "Invalid filepath"}, fmt.Sprintf("/api/files/unprivate/%d", int(testTutorial.ID)), "PATCH", testTeachingAssistant)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, status)
-	
+
 		// Get the tutorial file
 		actualTutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload.Name, filePayload.Week)
 		assert.NoError(t, err)
@@ -277,7 +277,7 @@ func TestInvalidFilepathUnprivateFile(t *testing.T) {
 		// Compare expected tutorial file that should be created with the actual file created
 		expectedTutorialFile := &models.TutorialFile{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[i].Filepath, Name: validFilesTests[i].Name, Visible: false, Week: validFilesTests[i].Week}
 		assertEqualTutorialFile(t, expectedTutorialFile, actualTutorialFile)
-	
+
 		// Clean up
 		CleanupCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
