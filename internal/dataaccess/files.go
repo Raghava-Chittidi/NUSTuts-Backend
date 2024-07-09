@@ -101,17 +101,3 @@ func UnprivateFileByFilepath(filepath string) error {
 	database.DB.Save(&tutorialFile)
 	return nil
 }
-
-func DeleteTutorialFileById(id int) error {
-	tutorialFile, err := GetTutorialFileById(id)
-	if err != nil {
-		return err
-	}
-
-	result := database.DB.Table("tutorials").Delete(&tutorialFile)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
