@@ -149,6 +149,23 @@ func TestValidGetConsultations(t *testing.T) {
 	}
 }
 
+// Test invalid date consultations fetch for date
+func TestInvalidDateGetConsultations(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Invalid date
+	date := "01-01-2021"
+
+	// Send a request to get consulations for the tutorial on the date
+	_, status, _ := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", testStudent)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 // Test valid book consultation for student
 func TestValidBookConsultation(t *testing.T) {
 	// Test for 10 dates in the future
@@ -193,6 +210,90 @@ func TestValidBookConsultation(t *testing.T) {
 		for _, consultation := range actualConsultationsForTutorialForDate {
 			dataaccess.DeleteConsultationById(int(consultation.ID))
 		}
+	}
+}
+
+// Test invalid consultation id book consultation for student
+// Test valid book consultation for student
+func TestInvalidConsultationIdBookConsultation(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Get date string for day after tomorrow
+	date := time.Now().AddDate(0, 0, 2).Format("2006-01-02")
+
+	// Send a request to get consulations for the tutorial on the date
+	res, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual consultations for the tutorial on the date
+	var consultationsForTutorialForDate api.ConsultationsResponse
+	err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+	assert.NoError(t, err)
+	actualConsultationsForTutorialForDate := consultationsForTutorialForDate.Consultations
+
+	for _, _ = range actualConsultationsForTutorialForDate {
+		// Send a request to the book consultation
+		_, status, _ = CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/book/%s?userId=%d", int(testTutorial.ID),
+			"notintid", int(testStudent.ID)), "PUT", testStudent)
+		assert.Equal(t, http.StatusBadRequest, status)
+	}
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+	// Clear consultations in actualConsultationsForTutorialForDate
+	for _, consultation := range actualConsultationsForTutorialForDate {
+		dataaccess.DeleteConsultationById(int(consultation.ID))
+	}
+}
+
+// Test invalid user id book consultation for student
+// Test valid book consultation for student
+func TestInvalidUserIdBookConsultation(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Get date string for day after tomorrow
+	date := time.Now().AddDate(0, 0, 2).Format("2006-01-02")
+
+	// Send a request to get consulations for the tutorial on the date
+	res, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual consultations for the tutorial on the date
+	var consultationsForTutorialForDate api.ConsultationsResponse
+	err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+	assert.NoError(t, err)
+	actualConsultationsForTutorialForDate := consultationsForTutorialForDate.Consultations
+
+	for _, consultation := range actualConsultationsForTutorialForDate {
+		// Send a request to the book consultation
+		_, status, _ = CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/book/%d?userId=%s", int(testTutorial.ID),
+			int(consultation.ID), "invaliduserid"), "PUT", testStudent)
+		assert.Equal(t, http.StatusBadRequest, status)
+	}
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+	// Clear consultations in actualConsultationsForTutorialForDate
+	for _, consultation := range actualConsultationsForTutorialForDate {
+		dataaccess.DeleteConsultationById(int(consultation.ID))
 	}
 }
 
@@ -249,6 +350,88 @@ func TestValidCancelConsultation(t *testing.T) {
 		for _, consultation := range actualConsultationsForTutorialForDate {
 			dataaccess.DeleteConsultationById(int(consultation.ID))
 		}
+	}
+}
+
+// Test invalid consultation id cancel consultation for student
+func TestInvalidConsultationIdCancelConsultation(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Get date string for day after tomorrow
+	date := time.Now().AddDate(0, 0, 2).Format("2006-01-02")
+
+	// Send a request to get consulations for the tutorial on the date
+	res, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual consultations for the tutorial on the date
+	var consultationsForTutorialForDate api.ConsultationsResponse
+	err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+	assert.NoError(t, err)
+	actualConsultationsForTutorialForDate := consultationsForTutorialForDate.Consultations
+
+	for _, _ = range actualConsultationsForTutorialForDate {
+		// Send a request to the cancel consultation
+		_, status, _ = CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/cancel/%s?userId=%d", int(testTutorial.ID),
+			"notintid", int(testStudent.ID)), "PUT", testStudent)
+		assert.Equal(t, http.StatusBadRequest, status)
+	}
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+	// Clear consultations in actualConsultationsForTutorialForDate
+	for _, consultation := range actualConsultationsForTutorialForDate {
+		dataaccess.DeleteConsultationById(int(consultation.ID))
+	}
+}
+
+// Test invalid user id cancel consultation for student
+func TestInvalidUserIdCancelConsultation(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Get date string for day after tomorrow
+	date := time.Now().AddDate(0, 0, 2).Format("2006-01-02")
+
+	// Send a request to get consulations for the tutorial on the date
+	res, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual consultations for the tutorial on the date
+	var consultationsForTutorialForDate api.ConsultationsResponse
+	err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+	assert.NoError(t, err)
+	actualConsultationsForTutorialForDate := consultationsForTutorialForDate.Consultations
+
+	for _, consultation := range actualConsultationsForTutorialForDate {
+		// Send a request to the cancel consultation
+		_, status, _ = CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/cancel/%d?userId=%s", int(testTutorial.ID),
+			int(consultation.ID), "invaliduserid"), "PUT", testStudent)
+		assert.Equal(t, http.StatusBadRequest, status)
+	}
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+	// Clear consultations in actualConsultationsForTutorialForDate
+	for _, consultation := range actualConsultationsForTutorialForDate {
+		dataaccess.DeleteConsultationById(int(consultation.ID))
 	}
 }
 
