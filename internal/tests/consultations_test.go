@@ -550,6 +550,39 @@ func TestGetBookedConsultationsForStudent(t *testing.T) {
 	CleanupCreatedTutorial(testTutorial)
 }
 
+// Test invalid date get booked consultations for student
+func TestInvalidDateGetBookedConsultationsForStudent(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Send a request to get booked consulations for the tutorial on the date
+	_, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/student/%d/%d?date=%s&time=%s", int(testTutorial.ID), int(testStudent.ID), "01-01-2021", "10:00"), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test invalid time get booked consultations for student
+func TestInvalidTimeGetBookedConsultationsForStudent(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Get date string for day after tomorrow
+	date := time.Now().AddDate(0, 0, 2).Format("2006-01-02")
+
+	// Send a request to get booked consulations for the tutorial on the date
+	_, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/student/%d/%d?date=%s&time=%s", int(testTutorial.ID), int(testStudent.ID), date, "invalidtime"), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 // Test get booked consultations for teaching assistant
 // Test by booking consultations for different students
 // TA should see all booked consultations booked by all students
@@ -711,4 +744,37 @@ func TestGetBookedConsultationsForTeachingAssistant(t *testing.T) {
 	CleanupCreatedStudent(testDefaultStudent)
 	CleanupCreatedTeachingAssistant(testTeachingAssistant)
 	CleanupCreatedTutorial(testTutorial)
+}
+
+// Test invalid date get booked consultations for teaching assistant
+func TestInvalidDateGetBookedConsultationsForTeachingAssistant(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Send a request to get booked consulations for the tutorial on the date
+	_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/teachingAssistant/%d?date=%s&time=%s", int(testTutorial.ID), "01-01-2021", "10:00"), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test invalid time get booked consultations for teaching assistant
+func TestInvalidTimeGetBookedConsultationsForTeachingAssistant(t *testing.T) {
+	// Create test TeachingAssistant, Student, Tutorial
+	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Get date string for day after tomorrow
+	date := time.Now().AddDate(0, 0, 2).Format("2006-01-02")
+
+	// Send a request to get booked consulations for the tutorial on the date
+	_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/teachingAssistant/%d?date=%s&time=%s", int(testTutorial.ID), date, "invalidtime"), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
