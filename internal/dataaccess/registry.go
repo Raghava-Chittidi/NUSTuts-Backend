@@ -32,3 +32,28 @@ func JoinTutorial(studentId int, tutorialId int) error {
 	result := database.DB.Table("registries").Create(register)
 	return result.Error
 }
+
+// func GetRegistryByStudentIDAndTutorialID(studentId int, tutorialId int) (*models.Registry, error) {
+// 	var registry models.Registry
+// 	result := database.DB.Table("registries").Where("student_id = ?", studentId).
+// 			Where("tutorial_id = ?", tutorialId).Find(&registry)
+// 	if result.Error != nil {
+// 		return nil, result.Error
+// 	}
+
+// 	return &registry, nil
+// }
+
+// func DeleteRegistryByStudentIDAndTutorialID(studentId int, tutorialId int) error {
+// 	registry, err := GetRegistryByStudentIDAndTutorialID(studentId, tutorialId)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	result := database.DB.Unscoped().Table("registries").Delete(registry)
+// 	if result.Error != nil {
+// 		return result.Error
+// 	}
+
+// 	return nil
+// }
