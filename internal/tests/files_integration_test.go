@@ -54,7 +54,7 @@ func assertEqualTutorialFile(t *testing.T, expected *models.TutorialFile, actual
 // Tests upload file - Unique name with valid week number
 func TestValidUploadFilepath(t *testing.T) {
 	for i, filePayload := range validFilesTests {
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Send a request to the upload file api endpoint
@@ -71,7 +71,7 @@ func TestValidUploadFilepath(t *testing.T) {
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
 	}
 }
@@ -80,7 +80,7 @@ func TestValidUploadFilepath(t *testing.T) {
 func TestInvalidWeekUploadFilepath(t *testing.T) {
 	for _, filePayload := range invalidWeekFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Send a request to the upload file api endpoint
@@ -94,7 +94,7 @@ func TestInvalidWeekUploadFilepath(t *testing.T) {
 		assert.Nil(t, tutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 	}
 }
 
@@ -102,7 +102,7 @@ func TestInvalidWeekUploadFilepath(t *testing.T) {
 func TestValidDeleteFilepath(t *testing.T) {
 	for _, filePayload := range validFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Create test tutorial file
@@ -120,7 +120,7 @@ func TestValidDeleteFilepath(t *testing.T) {
 		assert.Nil(t, tutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 	}
 }
 
@@ -128,7 +128,7 @@ func TestValidDeleteFilepath(t *testing.T) {
 func TestInvalidFilepathDeleteFilepath(t *testing.T) {
 	for i, filePayload := range validFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Create test tutorial file
@@ -149,7 +149,7 @@ func TestInvalidFilepathDeleteFilepath(t *testing.T) {
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
 	}
 }
@@ -158,7 +158,7 @@ func TestInvalidFilepathDeleteFilepath(t *testing.T) {
 func TestValidPrivateFile(t *testing.T) {
 	for i, filePayload := range validFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Create test tutorial file
@@ -179,7 +179,7 @@ func TestValidPrivateFile(t *testing.T) {
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
 	}
 }
@@ -188,7 +188,7 @@ func TestValidPrivateFile(t *testing.T) {
 func TestInvalidFilepathPrivateFile(t *testing.T) {
 	for i, filePayload := range validFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Create test tutorial file
@@ -209,7 +209,7 @@ func TestInvalidFilepathPrivateFile(t *testing.T) {
 		assertEqualTutorialFile(t, expectedTutorialFile, tutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
 	}
 }
@@ -218,7 +218,7 @@ func TestInvalidFilepathPrivateFile(t *testing.T) {
 func TestValidUnprivateFile(t *testing.T) {
 	for i, filePayload := range validFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Create test tutorial file and set visibility to false
@@ -244,7 +244,7 @@ func TestValidUnprivateFile(t *testing.T) {
 		assertEqualTutorialFile(t, expectedTutorialFile, actualTutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
 	}
 }
@@ -253,7 +253,7 @@ func TestValidUnprivateFile(t *testing.T) {
 func TestInvalidFilepathUnprivateFile(t *testing.T) {
 	for i, filePayload := range validFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		// Create test tutorial file
@@ -279,7 +279,7 @@ func TestInvalidFilepathUnprivateFile(t *testing.T) {
 		assertEqualTutorialFile(t, expectedTutorialFile, actualTutorialFile)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		dataaccess.DeleteTutorialFileByFilepath(tutorialFile.Filepath)
 	}
 }
@@ -287,7 +287,7 @@ func TestInvalidFilepathUnprivateFile(t *testing.T) {
 // Tests get files for Student - Valid URLParams System test?
 func TestValidGetFilesForStudent(t *testing.T) {
 	// Create test Student, TA and Tutorial
-	testStudent, _, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.NoError(t, err)
 
 	for _, filePayload := range validFilesTests {
@@ -325,7 +325,7 @@ func TestValidGetFilesForStudent(t *testing.T) {
 	}
 
 	// Clean up
-	CleanupCreatedStudentTeachingAssistantAndTutorial()
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 	for _, filePayload := range validFilesTests {
 		dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 	}
@@ -335,7 +335,7 @@ func TestValidGetFilesForStudent(t *testing.T) {
 func TestInvalidWeekGetFilesForStudent(t *testing.T) {
 	for _, filePayload := range invalidWeekFilesTests {
 		// Create test Student, TA and Tutorial
-		testStudent, _, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		for _, uploadFilePayload := range validFilesTests {
@@ -350,7 +350,7 @@ func TestInvalidWeekGetFilesForStudent(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, status)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		for _, filePayload := range validFilesTests {
 			dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 		}
@@ -361,7 +361,7 @@ func TestInvalidWeekGetFilesForStudent(t *testing.T) {
 func TestInvalidTutorialIDGetFilesForStudent(t *testing.T) {
 	for _, filePayload := range invalidWeekFilesTests {
 		// Create test Student, TA and Tutorial
-		testStudent, _, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		for _, uploadFilePayload := range validFilesTests {
@@ -376,7 +376,7 @@ func TestInvalidTutorialIDGetFilesForStudent(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, status)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		for _, filePayload := range validFilesTests {
 			dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 		}
@@ -386,7 +386,7 @@ func TestInvalidTutorialIDGetFilesForStudent(t *testing.T) {
 // Tests get files for TA - Valid URLParams System test?
 func TestValidGetFilesForTeachingAssistant(t *testing.T) {
 	// Create test Student, TA and Tutorial
-	_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.NoError(t, err)
 
 	for _, filePayload := range validFilesTests {
@@ -424,7 +424,7 @@ func TestValidGetFilesForTeachingAssistant(t *testing.T) {
 	}
 
 	// Clean up
-	CleanupCreatedStudentTeachingAssistantAndTutorial()
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 	for _, filePayload := range validFilesTests {
 		dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 	}
@@ -434,7 +434,7 @@ func TestValidGetFilesForTeachingAssistant(t *testing.T) {
 func TestInvalidWeekGetFilesForTeachingAssistant(t *testing.T) {
 	for _, filePayload := range invalidWeekFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		for _, uploadFilePayload := range validFilesTests {
@@ -449,7 +449,7 @@ func TestInvalidWeekGetFilesForTeachingAssistant(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, status)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		for _, filePayload := range validFilesTests {
 			dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 		}
@@ -460,7 +460,7 @@ func TestInvalidWeekGetFilesForTeachingAssistant(t *testing.T) {
 func TestInvalidTutorialIDGetFilesForTeachingAssistant(t *testing.T) {
 	for _, filePayload := range invalidWeekFilesTests {
 		// Create test Student, TA and Tutorial
-		_, testTeachingAssistant, testTutorial, err := CreateMockStudentTeachingAssistantAndTutorial()
+		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
 		for _, uploadFilePayload := range validFilesTests {
@@ -475,7 +475,7 @@ func TestInvalidTutorialIDGetFilesForTeachingAssistant(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, status)
 
 		// Clean up
-		CleanupCreatedStudentTeachingAssistantAndTutorial()
+		CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 		for _, filePayload := range validFilesTests {
 			dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 		}
@@ -483,6 +483,6 @@ func TestInvalidTutorialIDGetFilesForTeachingAssistant(t *testing.T) {
 }
 
 func TestC(t *testing.T) {
-	CleanupCreatedStudentTeachingAssistantAndTutorial()
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 	// fmt.Print("cleaning")
 }

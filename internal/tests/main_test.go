@@ -18,6 +18,45 @@ import (
 
 var TestRouter = router.Setup()
 
+var testTeachingAssistant = models.TeachingAssistant{
+	Name:     "test_ta",
+	Email:    "test_ta@gmail.com",
+	Password: "test_ta",
+}
+
+var testStudent = models.Student{
+	Name:     "test_student",
+	Email:    "test_student@gmail.com",
+	Password: "test_student",
+	Modules:  []string{"test_CS1101S"},
+}
+
+var testTutorial = models.Tutorial{
+	TutorialCode: "123456",
+	Module:       "test_CS1101S",
+}
+
+var testStudents = []models.Student{
+	{
+		Name:     "test_student1",
+		Email:    "test_student1@gmail.com",
+		Password: "test_student1",
+		Modules:  []string{"test_CS1101S"},
+	},
+	{
+		Name:     "test_student2",
+		Email:    "test_student2@gmail.com",
+		Password: "test_student2",
+		Modules:  []string{"test_CS1101S"},
+	},
+	{
+		Name:     "test_student3",
+		Email:    "test_student3@gmail.com",
+		Password: "test_student3",
+		Modules:  []string{"test_CS1101S"},
+	},
+}
+
 func TestMain(m *testing.M) {
 	err := database.Connect(true)
 	if err != nil {
@@ -74,52 +113,56 @@ func CreateMockRequest(payload interface{}, url string, method string, tokens ..
 func CreateStudentAuthenticatedMockRequest(payload interface{}, url string, method string, student *models.Student) ([]byte, int, error) {
 	// Create an authenticated Student user
 	authUser := auth.AuthenticatedUser{
-		ID:          int(student.ID),
-		Name:        student.Name,
-		Email:       student.Email,
-		Role:        auth.RoleStudent,
+		ID:    int(student.ID),
+		Name:  student.Name,
+		Email: student.Email,
+		Role:  auth.RoleStudent,
 	}
-	
+
 	// Generate access and refresh tokens
 	tokens, err := auth.AuthObj.GenerateTokens(&authUser)
 	if err != nil {
 		return nil, -1, err
 	}
-	
+
 	return CreateMockRequest(payload, url, method, tokens.AccessToken)
 }
 
 func CreateTeachingAssistantAuthenticatedMockRequest(payload interface{}, url string, method string, teachingAssistant *models.TeachingAssistant) ([]byte, int, error) {
 	// Create an authenticated TeachingAssistant user
 	authUser := auth.AuthenticatedUser{
-		ID:          int(teachingAssistant.ID),
-		Name:        teachingAssistant.Name,
-		Email:       teachingAssistant.Email,
-		Role:        auth.RoleTeachingAssistant,
+		ID:    int(teachingAssistant.ID),
+		Name:  teachingAssistant.Name,
+		Email: teachingAssistant.Email,
+		Role:  auth.RoleTeachingAssistant,
 	}
-	
+
 	// Generate access and refresh tokens
 	tokens, err := auth.AuthObj.GenerateTokens(&authUser)
 	if err != nil {
 		return nil, -1, err
 	}
-	
+
 	return CreateMockRequest(payload, url, method, tokens.AccessToken)
 }
 
-func CreateMockStudentTeachingAssistantAndTutorial() (*models.Student, *models.TeachingAssistant, *models.Tutorial, error) {
-	// Create test TeachingAssistant, Student, Tutorial
+func CreateSingleMockStudentTeachingAssistantAndTutorial() (*models.Student, *models.TeachingAssistant, *models.Tutorial, error) {
+	return CreateMockStudentTeachingAssistantAndTutorial(&testTeachingAssistant, &testTutorial, &testStudent)
+}
+
+func CreateMockStudentTeachingAssistantAndTutorial(testTeachingAssistant *models.TeachingAssistant,
+	testTutorial *models.Tutorial, testStudent *models.Student) (*models.Student, *models.TeachingAssistant, *models.Tutorial, error) {
 	testTeachingAssistant, err := dataaccess.CreateTeachingAssistant(testTeachingAssistant.Name, testTeachingAssistant.Email, testTeachingAssistant.Password)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	testTutorial, err := dataaccess.CreateTutorial(testTutorial.TutorialCode, testTutorial.Module, int(testTeachingAssistant.ID))
+	testTutorial, err = dataaccess.CreateTutorial(testTutorial.TutorialCode, testTutorial.Module, int(testTeachingAssistant.ID))
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	testStudent, err := dataaccess.CreateStudent(testStudent.Name, testStudent.Email, testStudent.Password, testStudent.Modules)
+	testStudent, err = dataaccess.CreateStudent(testStudent.Name, testStudent.Email, testStudent.Password, testStudent.Modules)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -147,9 +190,54 @@ func CreateMockStudentTeachingAssistantAndTutorial() (*models.Student, *models.T
 	return student, teachingAssistant, testTutorial, nil
 }
 
+func CreateMockStudent(testStudent *models.Student, testTeachingAssistant *models.TeachingAssistant,
+	testTutorial *models.Tutorial) (*models.Student, error) {
+	testStudent, err := dataaccess.CreateStudent(testStudent.Name, testStudent.Email, testStudent.Password, testStudent.Modules)
+	if err != nil {
+		return nil, err
+	}
+
+	// Assign TA to the tutorial
+	testTeachingAssistant.TutorialID = int(testTutorial.ID)
+	database.DB.Save(testTeachingAssistant)
+
+	// Enable Student to join the tutorial
+	err = dataaccess.JoinTutorial(int(testStudent.ID), int(testTutorial.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	student, err := dataaccess.GetStudentByEmail(testStudent.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return student, nil
+}
+
 // Cleanup all the created Teaching Assistants, Tutorials and Students for tests
-func CleanupCreatedStudentTeachingAssistantAndTutorial() {
+func CleanupCreatedStudentTeachingAssistantAndTutorial(testTeachingAssistant *models.TeachingAssistant, testTutorial *models.Tutorial, testStudent *models.Student) {
 	dataaccess.DeleteTeachingAssistantByEmail(testTeachingAssistant.Email)
 	dataaccess.DeleteTutorialByClassAndModuleCode(testTutorial.TutorialCode, testTutorial.Module)
 	dataaccess.DeleteStudentByEmail(testStudent.Email)
+}
+
+// Cleanup a student
+func CleanupCreatedStudent(student *models.Student) {
+	dataaccess.DeleteStudentByEmail(student.Email)
+}
+
+// Cleanup a teaching assistant
+func CleanupCreatedTeachingAssistant(teachingAssistant *models.TeachingAssistant) {
+	dataaccess.DeleteTeachingAssistantByEmail(teachingAssistant.Email)
+}
+
+// Cleanup a tutorial
+func CleanupCreatedTutorial(tutorial *models.Tutorial) {
+	dataaccess.DeleteTutorialByClassAndModuleCode(tutorial.TutorialCode, tutorial.Module)
+}
+
+// Cleanup all the created Teaching Assistants, Tutorials and Students for tests
+func CleanupSingleCreatedStudentTeachingAssistantAndTutorial() {
+	CleanupCreatedStudentTeachingAssistantAndTutorial(&testTeachingAssistant, &testTutorial, &testStudent)
 }
