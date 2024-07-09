@@ -259,7 +259,7 @@ func TestGetBookedConsultationsForStudent(t *testing.T) {
 	consultationIds := []uint{}
 	testStudentModels := []models.Student{}
 	dates := []string{}
-	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	testDefaultStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.NoError(t, err)
 	// Book 2 consultation slots for each student in testStudents
 	for i, student := range testStudents {
@@ -362,6 +362,170 @@ func TestGetBookedConsultationsForStudent(t *testing.T) {
 	for _, student := range testStudentModels {
 		CleanupCreatedStudent(&student)
 	}
+	CleanupCreatedStudent(testDefaultStudent)
+	CleanupCreatedTeachingAssistant(testTeachingAssistant)
+	CleanupCreatedTutorial(testTutorial)
+}
+
+// Test get booked consultations for teaching assistant
+// Test by booking consultations for different students
+// TA should see all booked consultations booked by all students
+func TestGetBookedConsultationsForTeachingAssistant(t *testing.T) {
+	consultationIds := []uint{}
+	testStudentModels := []models.Student{}
+	dates := []string{}
+	testDefaultStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+	// Book 2 consultation slots for each student in testStudents
+	for i, student := range testStudents {
+		// Create test TeachingAssistant, Student, Tutorial
+		student, err := CreateMockStudent(&student, testTeachingAssistant, testTutorial)
+		assert.NoError(t, err)
+		testStudentModels = append(testStudentModels, *student)
+		date := time.Now().AddDate(0, 0, i+1).Format("2006-01-02")
+		dates = append(dates, date)
+
+		// Send a request to get consulations for the tutorial on the date
+		res, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d?date=%s", int(testTutorial.ID), date), "GET", student)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, status)
+
+		// Get response in json
+		var response api.Response
+		err = json.Unmarshal(res, &response)
+		assert.NoError(t, err)
+		resData, _ := json.Marshal(response.Data)
+
+		// Get actual consultations for the tutorial on the date
+		var consultationsForTutorialForDate api.ConsultationsResponse
+		err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+		assert.NoError(t, err)
+		actualConsultationsForTutorialForDate := consultationsForTutorialForDate.Consultations
+
+		for _, consultation := range actualConsultationsForTutorialForDate {
+			// Add consultation ID to consultationIds
+			consultationIds = append(consultationIds, consultation.ID)
+			// Send a request to the book consultation
+			_, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/consultations/%d/book/%d?userId=%d", int(testTutorial.ID),
+				int(consultation.ID), int(student.ID)), "PUT", student)
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, status)
+			consultation, err := dataaccess.GetConsultationById(int(consultation.ID))
+			assert.NoError(t, err)
+			assert.True(t, consultation.Booked)
+		}
+	}
+
+	// Compare expected booked consultations for TA with the actual booked consultations
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil,
+		fmt.Sprintf("/api/consultations/teachingAssistant/%d?date=%s&time=%s", int(testTutorial.ID), dates[0], "10:00"), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual consultations for the tutorial on the date
+	var consultationsForTutorialForDate api.BookedConsultationsResponse
+	err = json.Unmarshal(resData, &consultationsForTutorialForDate)
+	assert.NoError(t, err)
+	actualConsultationsForTutorialForDate := consultationsForTutorialForDate
+
+	expectedBookedConsultations := api.BookedConsultationsResponse{
+		BookedConsultations: []api.BookedConsultationsByDate{
+			{
+				Date: dates[0],
+				Consultations: []api.ConsultationResponse{
+					{
+						ID:                1,
+						Tutorial:          *testTutorial,
+						Student:           testStudentModels[0],
+						TeachingAssistant: *testTeachingAssistant,
+						Date:              dates[0],
+						StartTime:         "10:00",
+						EndTime:           "11:00",
+						Booked:            true,
+					},
+					{
+						ID:                2,
+						Tutorial:          *testTutorial,
+						Student:           testStudentModels[0],
+						TeachingAssistant: *testTeachingAssistant,
+						Date:              dates[0],
+						StartTime:         "11:00",
+						EndTime:           "12:00",
+						Booked:            true,
+					},
+				},
+			},
+			{
+				Date: dates[1],
+				Consultations: []api.ConsultationResponse{
+					{
+						ID:                1,
+						Tutorial:          *testTutorial,
+						Student:           testStudentModels[1],
+						TeachingAssistant: *testTeachingAssistant,
+						Date:              dates[1],
+						StartTime:         "10:00",
+						EndTime:           "11:00",
+						Booked:            true,
+					},
+					{
+						ID:                2,
+						Tutorial:          *testTutorial,
+						Student:           testStudentModels[1],
+						TeachingAssistant: *testTeachingAssistant,
+						Date:              dates[1],
+						StartTime:         "11:00",
+						EndTime:           "12:00",
+						Booked:            true,
+					},
+				},
+			},
+			{
+				Date: dates[2],
+				Consultations: []api.ConsultationResponse{
+					{
+						ID:                1,
+						Tutorial:          *testTutorial,
+						Student:           testStudentModels[2],
+						TeachingAssistant: *testTeachingAssistant,
+						Date:              dates[2],
+						StartTime:         "10:00",
+						EndTime:           "11:00",
+						Booked:            true,
+					},
+					{
+						ID:                2,
+						Tutorial:          *testTutorial,
+						Student:           testStudentModels[2],
+						TeachingAssistant: *testTeachingAssistant,
+						Date:              dates[2],
+						StartTime:         "11:00",
+						EndTime:           "12:00",
+						Booked:            true,
+					},
+				},
+			},
+		},
+	}
+
+	assertEqualBookedConsultationsResponse(t, &expectedBookedConsultations, &actualConsultationsForTutorialForDate)
+
+	// Clean up
+	// Clean up consultations
+	for _, consultationId := range consultationIds {
+		dataaccess.DeleteConsultationById(int(consultationId))
+	}
+
+	// Clean up students, ta, tutorial
+	for _, student := range testStudentModels {
+		CleanupCreatedStudent(&student)
+	}
+	CleanupCreatedStudent(testDefaultStudent)
 	CleanupCreatedTeachingAssistant(testTeachingAssistant)
 	CleanupCreatedTutorial(testTutorial)
 }
