@@ -6,11 +6,21 @@ import (
 	"errors"
 )
 
+// DeleteConsultationById deletes a consultation by its id
+func DeleteConsultationById(id int) error {
+	result := database.DB.Unscoped().Table("consultations").Where("id = ?", id).Delete(&models.Consultation{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func GetAllConsultationsForTutorialForDate(tutorialId int, date string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").
-			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).
-			Order("date ASC").Find(&consultations)
+		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).
+		Order("date ASC").Find(&consultations)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -22,9 +32,9 @@ func GetAllConsultationsForTutorialForDate(tutorialId int, date string) (*[]mode
 func GetBookedConsultationsForTutorialForTA(tutorialId int, date string, time string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").Where("tutorial_id = ?", tutorialId).
-			Where("(date = ? AND end_time >= ?) OR (date > ?)", date, time, date).
-			Where("booked = true").
-			Order("date ASC").Order("start_time ASC").Find(&consultations)
+		Where("(date = ? AND end_time >= ?) OR (date > ?)", date, time, date).
+		Where("booked = true").
+		Order("date ASC").Order("start_time ASC").Find(&consultations)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -36,10 +46,10 @@ func GetBookedConsultationsForTutorialForTA(tutorialId int, date string, time st
 func GetBookedConsultationsForTutorialForStudent(tutorialId int, studentId int, date string, time string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").
-			Where("tutorial_id = ?", tutorialId).Where("student_id = ?", studentId).
-			Where("booked = true").
-			Where("(date = ? AND end_time >= ?) OR (date > ?)", date, time, date).
-			Order("date ASC").Order("start_time ASC").Find(&consultations)
+		Where("tutorial_id = ?", tutorialId).Where("student_id = ?", studentId).
+		Where("booked = true").
+		Where("(date = ? AND end_time >= ?) OR (date > ?)", date, time, date).
+		Order("date ASC").Order("start_time ASC").Find(&consultations)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -65,7 +75,7 @@ func BookConsultationById(id int, userID int) (*models.Consultation, error) {
 		return nil, err
 	}
 
-	if (consultation.Booked && consultation.StudentID != userID) {
+	if consultation.Booked && consultation.StudentID != userID {
 		return nil, errors.New("this consultation is booked by someone else")
 	}
 
@@ -81,7 +91,7 @@ func UnbookConsultationById(id int, userID int) (*models.Consultation, error) {
 		return nil, err
 	}
 
-	if (consultation.StudentID != userID) {
+	if consultation.StudentID != userID {
 		return nil, errors.New("you are not authorized to unbook this consultation")
 	}
 

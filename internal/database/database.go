@@ -16,7 +16,7 @@ func Connect(isTestDb ...bool) error {
 	// 	log.Fatalln("Failed to load env file!")
 	// 	return err
 	// }
-  
+
 	var dbUrl string
 	if len(isTestDb) > 0 && isTestDb[0] {
 		dbUrl = os.Getenv("TEST_DB_URL")
@@ -25,7 +25,7 @@ func Connect(isTestDb ...bool) error {
 	}
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN: dbUrl,
+		DSN:                  dbUrl,
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{})
 	if err != nil {
