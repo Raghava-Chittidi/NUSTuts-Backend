@@ -220,6 +220,7 @@ func CleanupCreatedStudentTeachingAssistantAndTutorial(testTeachingAssistant *mo
 	dataaccess.DeleteTeachingAssistantByEmail(testTeachingAssistant.Email)
 	dataaccess.DeleteTutorialByClassAndModuleCode(testTutorial.TutorialCode, testTutorial.Module)
 	dataaccess.DeleteStudentByEmail(testStudent.Email)
+	// dataaccess.DeleteRegistryByStudentIDAndTutorialID(testTeachingAssistant.TutorialID, testStudent.ID)
 }
 
 // Cleanup a student
