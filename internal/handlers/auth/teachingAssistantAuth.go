@@ -23,13 +23,13 @@ func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 
 	teachingAssistant, err := data.GetTeachingAssistantByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("teaching Assistant with this email does not exist"), http.StatusNotFound)
+		util.ErrorJSON(w, errors.New("invalid credentials"), http.StatusNotFound)
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, teachingAssistant.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("incorrect password"), http.StatusUnauthorized)
+		util.ErrorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
 		return
 	}
 

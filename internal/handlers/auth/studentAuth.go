@@ -46,7 +46,7 @@ func SignUpAsStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if payload.Password == "" {
+	if payload.Password == "" || len(payload.Password) < 6 {
 		util.ErrorJSON(w, errors.New("invalid password"), http.StatusBadRequest)
 		return
 	}
@@ -118,13 +118,13 @@ func LoginAsStudent(w http.ResponseWriter, r *http.Request) {
 
 	student, err := dataaccess.GetStudentByEmail(payload.Email)
 	if err != nil {
-		util.ErrorJSON(w, errors.New("student with this email does not exist"), http.StatusNotFound)
+		util.ErrorJSON(w, errors.New("invalid credentials"), http.StatusNotFound)
 		return
 	}
 
 	valid, err := util.VerifyPassword(payload.Password, student.Password)
 	if err != nil || !valid {
-		util.ErrorJSON(w, errors.New("incorrect password"), http.StatusUnauthorized)
+		util.ErrorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
 		return
 	}
 
