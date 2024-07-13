@@ -217,10 +217,10 @@ func CreateMockStudent(testStudent *models.Student, testTeachingAssistant *model
 
 // Cleanup all the created Teaching Assistants, Tutorials and Students for tests
 func CleanupCreatedStudentTeachingAssistantAndTutorial(testTeachingAssistant *models.TeachingAssistant, testTutorial *models.Tutorial, testStudent *models.Student) {
+	dataaccess.DeleteRegistryByStudentAndTutorial(testStudent, testTutorial)
 	dataaccess.DeleteTeachingAssistantByEmail(testTeachingAssistant.Email)
 	dataaccess.DeleteTutorialByClassAndModuleCode(testTutorial.TutorialCode, testTutorial.Module)
 	dataaccess.DeleteStudentByEmail(testStudent.Email)
-	// dataaccess.DeleteRegistryByStudentIDAndTutorialID(testTeachingAssistant.TutorialID, testStudent.ID)
 }
 
 // Cleanup a student
