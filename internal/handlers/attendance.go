@@ -6,28 +6,29 @@ import (
 	"NUSTuts-Backend/internal/models"
 	"NUSTuts-Backend/internal/util"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
-	"sort"
+
 	"github.com/go-chi/chi/v5"
 )
 
 func GetStudentAttendance(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	studentAttendance, err := dataaccess.GetStudentAttendance(tutorialId, studentId)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -38,19 +39,19 @@ func GetStudentAttendance(w http.ResponseWriter, r *http.Request) {
 func CheckStudentAttendance(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	attendance, err := dataaccess.GetTodayAttendanceByStudentId(studentId, tutorialId)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -60,7 +61,7 @@ func CheckStudentAttendance(w http.ResponseWriter, r *http.Request) {
 func GetAllAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -83,7 +84,7 @@ func GetAllAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
 func GetTodayAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -106,7 +107,7 @@ func GetTodayAttendanceForTutorial(w http.ResponseWriter, r *http.Request) {
 func GenerateAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -115,13 +116,13 @@ func GenerateAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 		// util.ErrorJSON(w, err, http.StatusInternalServerError)
 		// return
 	}
-	
+
 	err = dataaccess.DeleteTodayAttendanceByTutorialID(tutorialId)
 	if err != nil {
 		// util.ErrorJSON(w, err, http.StatusInternalServerError)
 		// return
 	}
-	
+
 	err = dataaccess.GenerateTodayAttendanceByTutorialID(tutorialId)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
@@ -141,7 +142,7 @@ func GenerateAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 func GetAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -161,7 +162,7 @@ func GetAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 		util.WriteJSON(w, api.Response{Message: "Code has expired!", Data: nil}, http.StatusOK)
 		return
 	}
-		
+
 	attendanceStringResponse := api.AttendanceStringResponse{AttendanceString: *attendanceString}
 	util.WriteJSON(w, api.Response{Message: "Code retrieved successfully!", Data: attendanceStringResponse}, http.StatusOK)
 }
@@ -169,14 +170,14 @@ func GetAttendanceCodeForTutorial(w http.ResponseWriter, r *http.Request) {
 func DeleteAttendanceString(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	var payload api.DeleteAttendanceStringPayload
 	err = util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -192,14 +193,14 @@ func DeleteAttendanceString(w http.ResponseWriter, r *http.Request) {
 func VerifyAndMarkStudentAttendance(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	var payload api.MarkAttendancePayload
 	err = util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -217,7 +218,7 @@ func VerifyAndMarkStudentAttendance(w http.ResponseWriter, r *http.Request) {
 		}
 		util.WriteJSON(w, api.Response{Message: "Your attendance has been marked successfully!"}, http.StatusOK)
 	}
-	
+
 	util.WriteJSON(w, api.Response{Message: "Invalid code!", Data: nil}, http.StatusOK)
 }
 
@@ -228,11 +229,11 @@ func transformAttendanceToAttendanceResponse(attendance models.Attendance) (*api
 	}
 
 	attendanceResponse := api.AttendanceResponse{
-		ID: attendance.ID,
-		Student: *student,
+		ID:         attendance.ID,
+		Student:    *student,
 		TutorialID: attendance.TutorialID,
-		Date: attendance.Date,
-		Present: attendance.Present,
+		Date:       attendance.Date,
+		Present:    attendance.Present,
 	}
 
 	return &attendanceResponse, nil
@@ -273,6 +274,6 @@ func getAttendanceListsByDateResponse(attendances *[]api.AttendanceResponse) api
 		date2, _ := time.Parse("2006-01-02", sortedAttendances[j].Date)
 		return date1.After(date2)
 	})
-	
+
 	return api.AttendanceListsByDateResponse{AttendanceLists: sortedAttendances}
 }
