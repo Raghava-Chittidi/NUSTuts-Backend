@@ -16,7 +16,7 @@ import (
 func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -52,14 +52,14 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	res := api.ConsultationsResponse{Consultations: *consultationsResponse}
-	util.WriteJSON(w, api.Response{Message: "Consultations for tutorial for date fetched successfully!", 
+	util.WriteJSON(w, api.Response{Message: "Consultations for tutorial for date fetched successfully!",
 		Data: res}, http.StatusOK)
 }
 
 func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -100,13 +100,13 @@ func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Reque
 func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -170,7 +170,7 @@ func transformConsultationToConsultationResponse(consultation models.Consultatio
 			return nil, err
 		}
 		student = *studentPointer
-	} 
+	}
 
 	// Get the tutorial
 	tutorial, err := dataaccess.GetTutorialById(consultation.TutorialID)
@@ -185,14 +185,14 @@ func transformConsultationToConsultationResponse(consultation models.Consultatio
 	}
 
 	return &api.ConsultationResponse{
-		ID: consultation.ID,
-		Tutorial: *tutorial,
-		Student: student,
+		ID:                consultation.ID,
+		Tutorial:          *tutorial,
+		Student:           student,
 		TeachingAssistant: *teachingAssistant,
-		Date: consultation.Date,
-		StartTime: consultation.StartTime,
-		EndTime: consultation.EndTime,
-		Booked: consultation.Booked,
+		Date:              consultation.Date,
+		StartTime:         consultation.StartTime,
+		EndTime:           consultation.EndTime,
+		Booked:            consultation.Booked,
 	}, nil
 }
 
@@ -256,7 +256,6 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
-
 
 	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
