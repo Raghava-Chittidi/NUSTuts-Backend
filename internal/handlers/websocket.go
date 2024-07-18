@@ -13,8 +13,8 @@ import (
 )
 
 // Configuration to upgrade to websocket protocol
-var Upgrader = websocket.Upgrader {
-	ReadBufferSize: 1024,
+var Upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		// Host check
@@ -28,7 +28,7 @@ var Upgrader = websocket.Upgrader {
 func CreateRoom(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -36,8 +36,8 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 	_, ok := websockets.MainHub.Rooms[tutorialId]
 	if !ok {
 		websockets.MainHub.Rooms[tutorialId] = &websockets.Room{
-			TutorialID: tutorialId, 
-			Users: make(map[int]*websockets.User),
+			TutorialID: tutorialId,
+			Users:      make(map[int]*websockets.User),
 		}
 	}
 
@@ -47,13 +47,13 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 func JoinRoom(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	userId, err := strconv.Atoi(r.URL.Query().Get("userId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -63,19 +63,19 @@ func JoinRoom(w http.ResponseWriter, r *http.Request) {
 	// Upgrade to websocket protocol
 	conn, err := Upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	defer conn.Close()
 
 	newUser := &websockets.User{
-		Socket: conn,
-		Receive: make(chan *websockets.Message, 10),
-		ID: userId,
-		Name: name,
+		Socket:   conn,
+		Receive:  make(chan *websockets.Message, 10),
+		ID:       userId,
+		Name:     name,
 		UserType: userType,
-		RoomID: tutorialId,
+		RoomID:   tutorialId,
 	}
 
 	// Register user who wants to join a room
