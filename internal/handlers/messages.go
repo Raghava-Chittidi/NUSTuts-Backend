@@ -15,7 +15,7 @@ import (
 func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -26,7 +26,7 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 	}
 
 	messagesWithSenders := lo.Map(*messages, func(item models.Message, index int) api.MessageResponse {
-		if (item.UserType == "student") {
+		if item.UserType == "student" {
 			sender, err := dataaccess.GetStudentById(item.SenderID)
 			if err != nil {
 				util.ErrorJSON(w, err, http.StatusInternalServerError)
@@ -34,11 +34,11 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 			}
 
 			return api.MessageResponse{
-				SenderID: item.SenderID, 
-				Sender: sender.Name, 
-				TutorialID: tutorialId, 
-				UserType: item.UserType, 
-				Content: item.Content,
+				SenderID:   item.SenderID,
+				Sender:     sender.Name,
+				TutorialID: tutorialId,
+				UserType:   item.UserType,
+				Content:    item.Content,
 			}
 		} else {
 			sender, err := dataaccess.GetTeachingAssistantById(item.SenderID)
@@ -48,15 +48,15 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 			}
 
 			return api.MessageResponse{
-				SenderID: item.SenderID, 
-				Sender: sender.Name, 
-				TutorialID: tutorialId, 
-				UserType: item.UserType, 
-				Content: item.Content,
+				SenderID:   item.SenderID,
+				Sender:     sender.Name,
+				TutorialID: tutorialId,
+				UserType:   item.UserType,
+				Content:    item.Content,
 			}
 		}
 	})
-	
+
 	res := api.MessagesResponse{Messages: messagesWithSenders}
 	util.WriteJSON(w, api.Response{Message: "Fetched messages successfully!", Data: res}, http.StatusOK)
 }
@@ -64,14 +64,14 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 func CreateMessageForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	var payload api.CreateMesssagePayload
 	err = util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err)
+		util.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
