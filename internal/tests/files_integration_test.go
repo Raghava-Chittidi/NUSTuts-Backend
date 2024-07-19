@@ -54,6 +54,7 @@ func assertEqualTutorialFile(t *testing.T, expected *models.TutorialFile, actual
 // Tests upload file - Unique name with valid week number
 func TestValidUploadFilepath(t *testing.T) {
 	for i, filePayload := range validFilesTests {
+		// Create test Student, TA and Tutorial
 		_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 		assert.NoError(t, err)
 
@@ -313,7 +314,7 @@ func TestValidGetFilesForStudent(t *testing.T) {
 	assert.NoError(t, err)
 	actualTutorialFiles := tutorialFilesResponse.Files
 
-	// Compare expected tutorial file that should be created with the actual file created
+	// Compare expected tutorial files that should be fetched with the actual files fetched
 	expectedTutorialFiles := &[]models.TutorialFile{
 		{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[1].Filepath, Name: validFilesTests[1].Name, Visible: true, Week: validFilesTests[1].Week},
 		{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[2].Filepath, Name: validFilesTests[2].Name, Visible: true, Week: validFilesTests[2].Week},
@@ -412,7 +413,7 @@ func TestValidGetFilesForTeachingAssistant(t *testing.T) {
 	assert.NoError(t, err)
 	actualTutorialFiles := tutorialFilesResponse.Files
 
-	// Compare expected tutorial file that should be created with the actual file created
+	// Compare expected tutorial files that should be fetched with the actual files fetched
 	expectedTutorialFiles := &[]models.TutorialFile{
 		{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[1].Filepath, Name: validFilesTests[1].Name, Visible: true, Week: validFilesTests[1].Week},
 		{TutorialID: int(testTutorial.ID), Filepath: validFilesTests[2].Filepath, Name: validFilesTests[2].Name, Visible: true, Week: validFilesTests[2].Week},
@@ -480,9 +481,4 @@ func TestInvalidTutorialIDGetFilesForTeachingAssistant(t *testing.T) {
 			dataaccess.DeleteTutorialFileByFilepath(filePayload.Filepath)
 		}
 	}
-}
-
-func TestC(t *testing.T) {
-	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
-	// fmt.Print("cleaning")
 }

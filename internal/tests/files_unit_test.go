@@ -83,7 +83,7 @@ func TestFilesDataaccess(t *testing.T) {
 
 	t.Run("Private Tutorial File by Filepath", func(t *testing.T) {
 		// Private the first file
-		err := dataaccess.PrivateFileByFilepath(filePayload1.Filepath)
+		err := dataaccess.PrivateTutorialFileByFilepath(filePayload1.Filepath)
 		assert.NoError(t, err)
 
 		// Get the privated file
@@ -96,7 +96,7 @@ func TestFilesDataaccess(t *testing.T) {
 
 	t.Run("Unprivate Tutorial File by Filepath", func(t *testing.T) {
 		// Unprivate the first file
-		err := dataaccess.UnprivateFileByFilepath(filePayload1.Filepath)
+		err := dataaccess.UnprivateTutorialFileByFilepath(filePayload1.Filepath)
 		assert.NoError(t, err)
 
 		// Get the unprivated file
