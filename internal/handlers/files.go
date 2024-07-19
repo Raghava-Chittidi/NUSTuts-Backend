@@ -137,7 +137,7 @@ func PrivateFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dataaccess.PrivateFileByFilepath(payload.Filepath)
+	err = dataaccess.PrivateTutorialFileByFilepath(payload.Filepath)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
@@ -155,7 +155,7 @@ func UnprivateFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dataaccess.UnprivateFileByFilepath(payload.Filepath)
+	err = dataaccess.UnprivateTutorialFileByFilepath(payload.Filepath)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return

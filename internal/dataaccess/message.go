@@ -34,3 +34,19 @@ func GetMessagesByTutorialId(id int) (*[]models.Message, error) {
 
 	return messages, nil
 }
+
+func DeleteMessagesByDiscussionId(id int) (error) {
+	messages, err := GetMessagesByDiscussionId(id)
+	if err != nil {
+		return err
+	}
+
+	for _, message := range *messages {
+		result := database.DB.Unscoped().Table("messages").Delete(&message)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
+}

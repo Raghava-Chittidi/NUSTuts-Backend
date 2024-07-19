@@ -40,3 +40,27 @@ func GetDiscussionIdByTutorialId(id int) (int, error) {
 
 	return int(discussion.ID), nil
 }
+
+func GetDiscussionById(id int) (*models.Discussion, error) {
+	var discussion models.Discussion
+	result := database.DB.Table("discussions").Where("id = ?", id).First(&discussion)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &discussion, nil
+}
+
+func DeleteDiscussionById(id int) (error) {
+	discussion, err := GetDiscussionById(id)
+	if err != nil {
+		return err
+	}
+
+	result := database.DB.Unscoped().Table("discussions").Delete(&discussion)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
