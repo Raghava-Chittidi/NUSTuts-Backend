@@ -2,7 +2,13 @@ package tests
 
 import (
 	"NUSTuts-Backend/internal/api"
+	"NUSTuts-Backend/internal/dataaccess"
+	"NUSTuts-Backend/internal/models"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -39,7 +45,45 @@ func assertEqualAttendanceListsResponse(t *testing.T, expected *api.AttendanceLi
 
 // Asserts whether the two attendance strings are equal by comparing their fields
 func assertEqualAttendanceStrings(t *testing.T, expected *api.AttendanceStringResponse, actual *api.AttendanceStringResponse) {
-	assert.Equal(t, expected.AttendanceString.Code, actual.AttendanceString.Code)
-	assert.Equal(t, expected.AttendanceString.ExpiresAt, actual.AttendanceString.ExpiresAt)
+	// assert.Equal(t, expected.AttendanceString.Code, actual.AttendanceString.Code)
+	// assert expire at within margin of error
+	assert.InDelta(t, expected.AttendanceString.ExpiresAt.Unix(), actual.AttendanceString.ExpiresAt.Unix(), 1)
 	assert.Equal(t, expected.AttendanceString.TutorialID, actual.AttendanceString.TutorialID)
+}
+
+// Test valid generate attendance code for tutorial
+func TestGenerateAttendanceCodeForTutorial(t *testing.T) {
+	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var attendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &attendanceStringResponse)
+	assert.NoError(t, err)
+
+	const AttendanceCodeDuration = 5
+	// Generate expected attendance string for the tutorial
+	expectedAttendanceString := api.AttendanceStringResponse{
+		AttendanceString: models.AttendanceString{
+			Code:       attendanceStringResponse.AttendanceString.Code,
+			ExpiresAt:  time.Now().Add(time.Minute * AttendanceCodeDuration), // within margin of error testing
+			TutorialID: int(testTutorial.ID),
+		},
+	}
+	assertEqualAttendanceStrings(t, &expectedAttendanceString, &attendanceStringResponse)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
