@@ -217,6 +217,7 @@ func VerifyAndMarkStudentAttendance(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		util.WriteJSON(w, api.Response{Message: "Your attendance has been marked successfully!"}, http.StatusOK)
+		return
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Invalid code!", Data: nil}, http.StatusOK)

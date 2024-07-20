@@ -156,3 +156,85 @@ func TestValidDeleteAttendanceCodeForTutorial(t *testing.T) {
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
+
+// Test valid student mark attendance
+func TestValidStudentMarkAttendance(t *testing.T) {
+	testStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var generatedAttendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &generatedAttendanceStringResponse)
+	assert.NoError(t, err)
+
+	markAttendancePayload := api.MarkAttendancePayload{
+		StudentID:      int(testStudent.ID),
+		AttendanceCode: generatedAttendanceStringResponse.AttendanceString.Code,
+	}
+
+	res, status, err = CreateStudentAuthenticatedMockRequest(markAttendancePayload, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response2 api.Response
+	err = json.Unmarshal(res, &response2)
+	assert.NoError(t, err)
+	assert.Nil(t, response2.Data)
+	assert.Equal(t, "Your attendance has been marked successfully!", response2.Message)
+
+	attendance, err := dataaccess.GetTodayAttendanceByStudentId(int(testStudent.ID), int(testTutorial.ID))
+	assert.NoError(t, err)
+	assert.NotNil(t, attendance)
+	assert.Equal(t, int(testStudent.ID), attendance.StudentID)
+	assert.Equal(t, int(testTutorial.ID), attendance.TutorialID)
+	assert.Equal(t, time.Now().Format("2006-01-02"), attendance.Date)
+	assert.Equal(t, true, attendance.Present)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test student mark attendance with wrong code
+func TestIncorrectCodeStudentMarkAttendance(t *testing.T) {
+	testStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var generatedAttendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &generatedAttendanceStringResponse)
+	assert.NoError(t, err)
+
+	markAttendancePayload := api.MarkAttendancePayload{
+		StudentID:      int(testStudent.ID),
+		AttendanceCode: generatedAttendanceStringResponse.AttendanceString.Code + "wrong",
+	}
+
+	_, status, _ = CreateStudentAuthenticatedMockRequest(markAttendancePayload, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", testStudent)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
