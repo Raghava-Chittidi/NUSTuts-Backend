@@ -14,7 +14,6 @@ func PublicRoutes() func(chi.Router) {
 
 func ProtectedRoutes() func(chi.Router) {
 	return func(r chi.Router) {
-		r.Route("/tutorials", TutorialRoutes)
 		r.Route("/requests", RequestRoutes)
 	}
 }

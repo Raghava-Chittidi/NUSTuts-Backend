@@ -201,7 +201,7 @@ func DeleteTutorialById(id int) error {
 		return err
 	}
 
-	result := database.DB.Table("tutorials").Delete(&tutorial)
+	result := database.DB.Unscoped().Table("tutorials").Delete(&tutorial)
 	if result.Error != nil {
 		return result.Error
 	}
