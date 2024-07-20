@@ -52,7 +52,7 @@ func assertEqualAttendanceStrings(t *testing.T, expected *api.AttendanceStringRe
 }
 
 // Test valid generate attendance code for tutorial
-func TestGenerateAttendanceCodeForTutorial(t *testing.T) {
+func TestValidGenerateAttendanceCodeForTutorial(t *testing.T) {
 	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.Nil(t, err)
 	// Send a request to generate attendance code for the tutorial
@@ -81,6 +81,48 @@ func TestGenerateAttendanceCodeForTutorial(t *testing.T) {
 		},
 	}
 	assertEqualAttendanceStrings(t, &expectedAttendanceString, &attendanceStringResponse)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test valid get attendance code for tutorial
+func TestValidGetAttendanceCodeForTutorial(t *testing.T) {
+	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var generatedAttendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &generatedAttendanceStringResponse)
+	assert.NoError(t, err)
+
+	// Send a request to get attendance code for the tutorial
+	res, status, err = CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ = json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var attendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &attendanceStringResponse)
+	assert.NoError(t, err)
+	assertEqualAttendanceStrings(t, &generatedAttendanceStringResponse, &attendanceStringResponse)
 
 	// Clean up
 	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
