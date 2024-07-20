@@ -129,3 +129,30 @@ func TestValidGetAttendanceCodeForTutorial(t *testing.T) {
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
+
+// Test valid delete attendance code for tutorial
+func TestValidDeleteAttendanceCodeForTutorial(t *testing.T) {
+	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	_, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+
+	// Send a request to delete attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/delete", int(testTutorial.ID)), "POST", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	assert.Nil(t, response.Data)
+	assert.Equal(t, "Expired code has been removed successfully!", response.Message)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}

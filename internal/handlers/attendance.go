@@ -174,12 +174,12 @@ func DeleteAttendanceString(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload api.DeleteAttendanceStringPayload
-	err = util.ReadJSON(w, r, &payload)
-	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
+	// var payload api.DeleteAttendanceStringPayload
+	// err = util.ReadJSON(w, r, &payload)
+	// if err != nil {
+	// 	util.ErrorJSON(w, err, http.StatusBadRequest)
+	// 	return
+	// }
 
 	err = dataaccess.DeleteGeneratedAttendanceString(tutorialId)
 	if err != nil {
