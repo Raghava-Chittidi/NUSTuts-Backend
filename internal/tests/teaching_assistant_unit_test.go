@@ -19,7 +19,6 @@ func assertEqualTeachingAssistant(t *testing.T, expected *models.TeachingAssista
 
 func TestTeachingAssistantDataaccess(t *testing.T) {
 	var testTeachingAssistantId int
-	var testTeachingAssistantEmail string
 	t.Run("Create teaching assistant", func(t *testing.T) {
 		// Current no. of teaching assistants in the test db should be 0
 		var count int64
@@ -30,7 +29,6 @@ func TestTeachingAssistantDataaccess(t *testing.T) {
 		teachingAssistant, err := dataaccess.CreateTeachingAssistant(testTeachingAssistant.Name, testTeachingAssistant.Email, testTeachingAssistant.Password)
 		assert.NoError(t, err)
 		testTeachingAssistantId = int(teachingAssistant.ID)
-		testTeachingAssistantEmail = teachingAssistant.Email
 
 		// Current no. of teaching assistants in the test db should be 1
 		database.DB.Table("teaching_assistants").Count(&count)
@@ -48,7 +46,7 @@ func TestTeachingAssistantDataaccess(t *testing.T) {
 
 	t.Run("Get Teaching Assistant by Email", func(t *testing.T) {
 		// Get the teaching assistant
-		teachingAssistant, err := dataaccess.GetTeachingAssistantByEmail(testTeachingAssistantEmail)
+		teachingAssistant, err := dataaccess.GetTeachingAssistantByEmail(testTeachingAssistant.Email)
 		assert.NoError(t, err)
 
 		// Compare expected teaching assistant that should be fetched with the actual teaching assistant fetched
@@ -81,7 +79,7 @@ func TestTeachingAssistantDataaccess(t *testing.T) {
 		assert.Equal(t, 1, int(count))
 
 		// Delete the teaching assistant that has been recreated
-		err := dataaccess.DeleteTeachingAssistantByEmail(testTeachingAssistantEmail)
+		err := dataaccess.DeleteTeachingAssistantByEmail(testTeachingAssistant.Email)
 		assert.NoError(t, err)
 
 		// Current no. of teaching assistants in the test db should be 0

@@ -27,6 +27,16 @@ func GetAllStudentIdsOfStudentsInTutorial(tutorialId int) (*[]int, error) {
 	return &studentIds, nil
 }
 
+func CheckIfStudentInTutorialById(studentId int, tutorialId int) (bool, error) {
+	var registry models.Registry
+	result := database.DB.Table("registries").Where("tutorial_id = ?", tutorialId).Where("student_id = ?", studentId).First(&registry)
+	if result.Error != nil {
+		return false, result.Error
+	}
+
+	return true, nil
+}
+
 func JoinTutorial(studentId int, tutorialId int) error {
 	register := &models.Registry{StudentID: studentId, TutorialID: tutorialId}
 	result := database.DB.Table("registries").Create(register)

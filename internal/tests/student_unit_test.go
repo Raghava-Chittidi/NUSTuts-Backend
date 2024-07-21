@@ -25,7 +25,6 @@ func assertEqualStudent(t *testing.T, expected *models.Student, actual *models.S
 
 func TestStudentDataaccess(t *testing.T) {
 	var testStudentId int
-	var testStudentEmail string
 	t.Run("Create Student", func(t *testing.T) {
 		// Current no. of students in the test db should be 0
 		var count int64
@@ -36,7 +35,6 @@ func TestStudentDataaccess(t *testing.T) {
 		student, err := dataaccess.CreateStudent(testStudent.Name, testStudent.Email, testStudent.Password, testStudent.Modules)
 		assert.NoError(t, err)
 		testStudentId = int(student.ID)
-		testStudentEmail = student.Email
 
 		// Current no. of students in the test db should be 1
 		database.DB.Table("students").Count(&count)
@@ -54,7 +52,7 @@ func TestStudentDataaccess(t *testing.T) {
 
 	t.Run("Get Student by Email", func(t *testing.T) {
 		// Get the student
-		student, err := dataaccess.GetStudentByEmail(testStudentEmail)
+		student, err := dataaccess.GetStudentByEmail(testStudent.Email)
 		assert.NoError(t, err)
 
 		// Compare expected student that should be fetched with the actual student fetched
@@ -68,7 +66,7 @@ func TestStudentDataaccess(t *testing.T) {
 		assert.Equal(t, 1, int(count))
 
 		// Delete the student created by the first test
-		err := dataaccess.DeleteStudentByEmail(testStudentEmail)
+		err := dataaccess.DeleteStudentByEmail(testStudent.Email)
 		assert.NoError(t, err)
 
 		// Current no. of students in the test db should be 0
