@@ -175,16 +175,6 @@ func GetAllTutorialIDs() (*[]int, error) {
 	return &tutorialIds, nil
 }
 
-func CheckIfStudentInTutorialById(studentId int, tutorialId int) (bool, error) {
-	var registry models.Registry
-	result := database.DB.Table("registries").Where("tutorial_id = ?", tutorialId).Where("student_id = ?", studentId).First(&registry)
-	if result.Error != nil {
-		return false, result.Error
-	}
-
-	return true, nil
-}
-
 func CheckIfTeachingAssistantInTutorialById(teachingAssistantId int, tutorialId int) (bool, error) {
 	var tutorial models.Tutorial
 	result := database.DB.Table("tutorials").Where("id = ?", tutorialId).Where("teaching_assistant_id = ?", teachingAssistantId).First(&tutorial)
