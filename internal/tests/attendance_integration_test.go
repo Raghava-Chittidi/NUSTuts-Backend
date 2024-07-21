@@ -37,6 +37,7 @@ func assertEqualAttendanceListsByDateResponse(t *testing.T, expected *api.Attend
 // Asserts whether the two attendance lists response are equal by comparing their fields
 func assertEqualAttendanceListsResponse(t *testing.T, expected *api.AttendanceListResponse, actual *api.AttendanceListResponse) {
 	assert.Equal(t, len(expected.Attendances), len(actual.Attendances))
+
 	for i, expectedAttendance := range expected.Attendances {
 		actualAttendance := actual.Attendances[i]
 		assertEqualAttendanceResponse(t, &expectedAttendance, &actualAttendance)
@@ -294,4 +295,149 @@ func TestValidCheckStudentAttendance(t *testing.T) {
 	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test valid get today attendance for tutorial
+func TestValidGetTodayAttendanceForTutorial(t *testing.T) {
+	testStudentModels := []models.Student{}
+	testDefaultStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	for _, student := range testStudents {
+		// Create test TeachingAssistant, Student, Tutorial
+		student, err := CreateMockStudent(&student, testTeachingAssistant, testTutorial)
+		assert.NoError(t, err)
+		testStudentModels = append(testStudentModels, *student)
+	}
+
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var generatedAttendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &generatedAttendanceStringResponse)
+	assert.NoError(t, err)
+
+	// Send a request to get today attendance for the tutorial
+	res, status, err = CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/list", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	// Get response in json
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ = json.Marshal(response.Data)
+
+	var attendanceListResponse api.AttendanceListResponse
+	err = json.Unmarshal(resData, &attendanceListResponse)
+	assert.NoError(t, err)
+
+	// Expected today attendance list for the tutorial
+	expectedAttendanceList := api.AttendanceListResponse{
+		Attendances: []api.AttendanceResponse{
+			{
+				Student:    *testDefaultStudent,
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    false,
+			},
+			{
+				Student:    testStudentModels[0],
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    false,
+			},
+			{
+				Student:    testStudentModels[1],
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    false,
+			},
+			{
+				Student:    testStudentModels[2],
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    false,
+			},
+		},
+	}
+
+	assertEqualAttendanceListsResponse(t, &expectedAttendanceList, &attendanceListResponse)
+
+	for i, student := range testStudents {
+		// Mark attendance
+		markAttendancePayload := api.MarkAttendancePayload{
+			StudentID:      int(testStudentModels[i].ID),
+			AttendanceCode: generatedAttendanceStringResponse.AttendanceString.Code,
+		}
+
+		_, status, _ = CreateStudentAuthenticatedMockRequest(markAttendancePayload, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", &student)
+		assert.Equal(t, http.StatusOK, status)
+	}
+
+	// Send a request to get today attendance for the tutorial
+	res, status, err = CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/list", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ = json.Marshal(response.Data)
+
+	var attendanceListResponseMarked api.AttendanceListResponse
+	err = json.Unmarshal(resData, &attendanceListResponseMarked)
+	assert.NoError(t, err)
+
+	// Expected today attendance list for the tutorial
+	expectedAttendanceListMarked := api.AttendanceListResponse{
+		Attendances: []api.AttendanceResponse{
+			{
+				Student:    *testDefaultStudent,
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    false,
+			},
+			{
+				Student:    testStudentModels[0],
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    true,
+			},
+			{
+				Student:    testStudentModels[1],
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    true,
+			},
+			{
+				Student:    testStudentModels[2],
+				TutorialID: int(testTutorial.ID),
+				Date:       time.Now().Format("2006-01-02"),
+				Present:    true,
+			},
+		},
+	}
+
+	assertEqualAttendanceListsResponse(t, &expectedAttendanceListMarked, &attendanceListResponseMarked)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+
+	// Clean up students, ta, tutorial
+	for _, student := range testStudentModels {
+		CleanupCreatedStudent(&student)
+	}
+	CleanupCreatedStudent(testDefaultStudent)
+	CleanupCreatedTeachingAssistant(testTeachingAssistant)
+	CleanupCreatedTutorial(testTutorial)
 }
