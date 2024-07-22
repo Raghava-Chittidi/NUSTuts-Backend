@@ -102,7 +102,7 @@ func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if filename is already in use for that tutorial and week
-	ok, err := dataaccess.CheckIfNameExistsForTutorialIDAndWeek(tutorialId, payload.Name, payload.Week)
+	ok, err := dataaccess.CheckIfFilenameExistsForTutorialIDAndWeek(tutorialId, payload.Name, payload.Week)
 	if err != nil || ok {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return

@@ -7,7 +7,7 @@ import (
 )
 
 // Checks whether filename already exists for a given tutorial id and week number
-func CheckIfNameExistsForTutorialIDAndWeek(tutorialId int, filename string, week int) (bool, error) {
+func CheckIfFilenameExistsForTutorialIDAndWeek(tutorialId int, filename string, week int) (bool, error) {
 	tutorialFile, _ := GetTutorialFileFromTutorialIDAndFilename(tutorialId, filename, week)
 	if tutorialFile != nil {
 		return true, errors.New("filename already exists")

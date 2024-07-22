@@ -32,6 +32,24 @@ func TestFilesDataaccess(t *testing.T) {
 		assert.Equal(t, 1, int(count))
 	})
 
+	t.Run("Filename already exists for that tutorial and week", func(t *testing.T) {
+		// Check if filename exists
+		ok, err := dataaccess.CheckIfFilenameExistsForTutorialIDAndWeek(int(testTutorial.ID), filePayload1.Name, filePayload1.Week)
+		assert.Error(t, err)
+
+		// Compare expected boolean value with the actual boolean value
+		assert.Equal(t, true, ok)
+	})
+
+	t.Run("Filename does not exist for that tutorial and week", func(t *testing.T) {
+		// Check if filename exists
+		ok, err := dataaccess.CheckIfFilenameExistsForTutorialIDAndWeek(int(testTutorial.ID), filePayload2.Name, filePayload1.Week)
+		assert.NoError(t, err)
+
+		// Compare expected boolean value with the actual boolean value
+		assert.Equal(t, false, ok)
+	})
+
 	t.Run("Get Tutorial File from TutorialID and Filename", func(t *testing.T) {
 		// Get the actual tutorial file that is created
 		tutorialFile, err := dataaccess.GetTutorialFileFromTutorialIDAndFilename(int(testTutorial.ID), filePayload1.Name, filePayload1.Week)

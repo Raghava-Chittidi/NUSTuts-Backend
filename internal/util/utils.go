@@ -47,11 +47,13 @@ func ErrorJSON(w http.ResponseWriter, err error, status ...int) {
 	WriteJSON(w, resData, statusCode)
 }
 
+// Get hash string of the password passed in
 func GetPasswordHash(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 0)
 	return string(hash), err
 }
 
+// Get the current semester based on the current time
 func GetCurrentSem() int {
 	if time.Now().Month() <= 7 {
 		return 2
@@ -60,6 +62,7 @@ func GetCurrentSem() int {
 	return 1
 }
 
+// Get the current academic year based on the current time
 func GetCurrentAY() string {
 	year := time.Now().Year()
 	sem := GetCurrentSem()
