@@ -18,6 +18,7 @@ func Connect(isTestDb ...bool) error {
 	// }
 
 	var dbUrl string
+	// Check whether we want to connect to the test database (during testing) or the actual database
 	if len(isTestDb) > 0 && isTestDb[0] {
 		dbUrl = os.Getenv("TEST_DB_URL")
 	} else {

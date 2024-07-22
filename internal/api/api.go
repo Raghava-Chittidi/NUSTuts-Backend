@@ -5,10 +5,17 @@ import (
 	"NUSTuts-Backend/internal/models"
 )
 
-type Response struct {
-	Data interface{} `json:"data,omitempty"`
-	Message string `json:"message"`
-	Error error `json:"error,omitempty"`
+// Request payload types
+type LoginPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type StudentSignupPayload struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Modules  []string `json:"modules"`
 }
 
 type RequestToJoinTutorialPayload struct {
@@ -21,12 +28,6 @@ type UploadFilePayload struct {
 	Name string `json:"name"`
 	Week int `json:"week"`
 	Filepath string `json:"filepath"`
-}
-
-type RequestResponse struct {
-	ID int `json:"id"`
-	Name string `json:"name"`
-	Email string `json:"email"`
 }
 
 type FilepathPayload struct {
@@ -46,6 +47,19 @@ type MarkAttendancePayload struct {
 
 type DeleteAttendanceStringPayload struct {
 	AttendanceCode string `json:"attendanceCode"`
+}
+
+// Response types
+type Response struct {
+	Data interface{} `json:"data,omitempty"`
+	Message string `json:"message"`
+	Error error `json:"error,omitempty"`
+}
+
+type RequestResponse struct {
+	ID int `json:"id"`
+	Name string `json:"name"`
+	Email string `json:"email"`
 }
 
 type StudentAuthResponse struct {

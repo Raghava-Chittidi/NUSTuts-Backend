@@ -17,21 +17,23 @@ import (
 func GetAllTutorialFilesForTAs(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
 	week, err := strconv.Atoi(chi.URLParam(r, "week"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
+	// Check if week provided is valid
 	if week < 1 || week > 13 {
-		util.ErrorJSON(w, errors.New("invalid week"), http.StatusBadRequest)
+		util.ErrorJSON(w, errors.New("invalid week"))
 		return
 	}
 
+	// Get all the files for that tutorial and week
 	files, err := dataaccess.GetAllTutorialFilesFromTutorialIDAndWeek(tutorialId, week)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
@@ -46,27 +48,30 @@ func GetAllTutorialFilesForTAs(w http.ResponseWriter, r *http.Request) {
 func GetAllTutorialFilesForStudents(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
 	week, err := strconv.Atoi(chi.URLParam(r, "week"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
+	// Check if week provided is valid
 	if week < 1 || week > 13 {
-		util.ErrorJSON(w, errors.New("invalid week"), http.StatusBadRequest)
+		util.ErrorJSON(w, errors.New("invalid week"))
 		return
 	}
 
+	// Get all the files for that tutorial and week
 	files, err := dataaccess.GetAllTutorialFilesFromTutorialIDAndWeek(tutorialId, week)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
+	// Only show students the files that are visible
 	*files = lo.Filter(*files, func(item models.TutorialFile, index int) bool {
 		return item.Visible
 	})
@@ -75,28 +80,30 @@ func GetAllTutorialFilesForStudents(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Tutorial Files fetched successfully!", Data: res}, http.StatusOK)
 }
 
-// Called when TA uploads a new file
+// Called when Teaching Assistant uploads a new file
 func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
 	var payload api.UploadFilePayload
 	err = util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
+	// Check if week provided is valid
 	if payload.Week < 1 || payload.Week > 13 {
-		util.ErrorJSON(w, errors.New("invalid week"), http.StatusBadRequest)
+		util.ErrorJSON(w, errors.New("invalid week"))
 		return
 	}
 
-	err = dataaccess.CheckIfNameExistsForTutorialIDAndWeek(tutorialId, payload.Name, payload.Week)
-	if err != nil {
+	// Check if filename is already in use for that tutorial and week
+	ok, err := dataaccess.CheckIfNameExistsForTutorialIDAndWeek(tutorialId, payload.Name, payload.Week)
+	if err != nil || ok {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -110,12 +117,12 @@ func UploadFilepath(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "File uploaded successfully!"}, http.StatusCreated)
 }
 
-// Called when TA deletes a file
+// Called when Teaching Assistant deletes a file
 func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
 	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -128,12 +135,12 @@ func DeleteFilepath(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Filepath removed from table successfully!"}, http.StatusOK)
 }
 
-// Called when TA privates a file
+// Called when Teaching Assistant privates a file
 func PrivateFile(w http.ResponseWriter, r *http.Request) {
 	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -146,12 +153,12 @@ func PrivateFile(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "File privated successfully!"}, http.StatusOK)
 }
 
-// Called when TA unprivates a file
+// Called when Teaching Assistant unprivates a file
 func UnprivateFile(w http.ResponseWriter, r *http.Request) {
 	var payload api.FilepathPayload
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 

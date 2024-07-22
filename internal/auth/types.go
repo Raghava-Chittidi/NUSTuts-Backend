@@ -18,6 +18,7 @@ type Tokens struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+// Role can be used to identify whether a user is a Student or a Teaching Assistant for access control
 type Claims struct {
 	jwt.RegisteredClaims
 	Email string `json:"email"`

@@ -12,10 +12,11 @@ import (
 	"github.com/samber/lo"
 )
 
+// Gets the message history for that tutorial
 func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -25,6 +26,7 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Modify the messages list to also contain names of the senders
 	messagesWithSenders := lo.Map(*messages, func(item models.Message, index int) api.MessageResponse {
 		if item.UserType == "student" {
 			sender, err := dataaccess.GetStudentById(item.SenderID)
@@ -61,17 +63,18 @@ func GetAllMessagesForTutorial(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Fetched messages successfully!", Data: res}, http.StatusOK)
 }
 
+// Called when a user sends a meesage in their tutorial discussion chat
 func CreateMessageForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
 	var payload api.CreateMesssagePayload
 	err = util.ReadJSON(w, r, &payload)
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 

@@ -53,7 +53,7 @@ func AuthoriseUser(h http.Handler) http.Handler {
 			return
 		}
 		
-		// Ensure students cannot access any files and attendance routes without "student" inside the route 
+		// Ensure students cannot access any files and attendance routes without "student" inside the route path
 		if privilege == auth.RoleStudent.Privilege && (strings.Contains(urlPath, "files") || strings.Contains(urlPath, "attendance")) && 
 				!strings.Contains(urlPath, "student") {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -66,6 +66,7 @@ func AuthoriseUser(h http.Handler) http.Handler {
 
 func ValidateTutorialID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if valid access token is present
 		_, claims, err := auth.AuthObj.VerifyToken(w, r)
 		if err != nil {
 			log.Println(err)
@@ -73,6 +74,7 @@ func ValidateTutorialID(h http.Handler) http.Handler {
 			return
 		}
 
+		// Get the tutorial id in the url
 		userType := claims.Role.UserType
 		url := r.URL.String()
 		re := regexp.MustCompile(`(\d)+`)
@@ -83,13 +85,14 @@ func ValidateTutorialID(h http.Handler) http.Handler {
 			return
 		}
 
+		// Get user id
 		id, err := strconv.Atoi(claims.Subject)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		// Ensure Student/TA who is making this request for a tutorial, is in that tutorial
+		// Ensure that the Student/TA who is making this request from inside a tutorial, is in that tutorial. Else, user is not authorised to perform such actions
 		if userType == "student" {
 			valid, err := dataaccess.CheckIfStudentInTutorialById(id, tutorialId)
 			if err != nil || !valid {

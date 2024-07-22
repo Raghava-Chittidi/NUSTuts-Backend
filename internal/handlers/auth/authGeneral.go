@@ -12,12 +12,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// Generate new access and refresh tokens to re authenticate user if they have a valid refresh cookie
 func RefreshAuthStatus(w http.ResponseWriter, r *http.Request) {
+	// Iterate through all the cookies to see if there has been any cookie set by this application previously
 	for _, cookie := range r.Cookies() {
 		if cookie.Name == auth.AuthObj.CookieName {
 			claims := &auth.Claims{}
 			refreshToken := cookie.Value
 
+			// Check if it is a valid refresh cookie
 			_, err := jwt.ParseWithClaims(refreshToken, claims, func(t *jwt.Token) (interface{}, error) {
 				return []byte(auth.AuthObj.Secret), nil
 			})
@@ -26,6 +29,7 @@ func RefreshAuthStatus(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			
+			// Check if the user is valid
 			userId, err := strconv.Atoi(claims.Subject)
 			if err != nil {
 				util.ErrorJSON(w, errors.New("unknown user"), http.StatusUnauthorized)
@@ -71,10 +75,12 @@ func RefreshAuthStatus(w http.ResponseWriter, r *http.Request) {
 					Tokens: 	 tokens,
 				}
 
+				// Generate and set new refresh cookie
 				refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
 				http.SetCookie(w, refreshCookie)
 				util.WriteJSON(w, api.Response{Message: "Refreshed auth status successfully!", Data: authenticatedStudent}, http.StatusOK)
 				return
+
 			} else if claims.Role.UserType == "teachingAssistant" {
 				teachingAssistant, err := dataaccess.GetTeachingAssistantById(userId)
 				if err != nil {
@@ -106,20 +112,24 @@ func RefreshAuthStatus(w http.ResponseWriter, r *http.Request) {
 					Tokens: 	 tokens,
 				}
 
+				// Generate and set new refresh cookie
 				refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
 				http.SetCookie(w, refreshCookie)
 				util.WriteJSON(w, api.Response{Message: "Refreshed auth status successfully!", Data: authenticatedTA}, http.StatusOK)
 				return
 			} else {
+				// Invalid role and user
 				util.ErrorJSON(w, errors.New("invalid user"), http.StatusUnauthorized)
 				return 
 			}
 		}
 	}
 
+	// If reach here, no refresh cookie was found
 	util.WriteJSON(w, api.Response{Message: "No refresh cookie!"}, http.StatusOK)
 }
 
+// Logout by deleting the refresh cookie that had been set
 func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, auth.AuthObj.DeleteRefreshCookie())
 	util.WriteJSON(w, api.Response{Message: "Logged out successfully!"}, http.StatusOK)

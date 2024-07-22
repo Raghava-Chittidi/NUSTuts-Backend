@@ -10,5 +10,5 @@ type Student struct {
 	Name      string         `json:"name" gorm:"not null"`
 	Email     string         `json:"email" gorm:"unique;not null"`
 	Password  string         `json:"password" gorm:"not null"`
-	Modules   pq.StringArray `json:"modules" gorm:"type:text[];not null"`              // Use pq.StringArray to prevent empty string array from being null when inserted into db
+	Modules   pq.StringArray `json:"modules" gorm:"type:text[];not null"` // Use pq.StringArray to prevent empty string array from being null when inserted into db
 }
