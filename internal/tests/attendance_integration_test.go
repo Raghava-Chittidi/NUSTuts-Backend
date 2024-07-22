@@ -372,7 +372,7 @@ func TestValidGetTodayAttendanceForTutorial(t *testing.T) {
 
 	assertEqualAttendanceListsResponse(t, &expectedAttendanceList, &attendanceListResponse)
 
-	for i, student := range testStudents {
+	for i, student := range testStudentModels {
 		// Mark attendance
 		markAttendancePayload := api.MarkAttendancePayload{
 			StudentID:      int(testStudentModels[i].ID),
