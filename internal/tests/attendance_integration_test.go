@@ -105,6 +105,18 @@ func TestValidGenerateAttendanceCodeForTutorial(t *testing.T) {
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
+// Test generate attendance code for tutorial with invalid tutorial id
+func TestInvalidTutorialIDGenerateAttendanceCodeForTutorial(t *testing.T) {
+	_, testTeachingAssistant, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	_, status, _ := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/invalid/generate"), "GET", testTeachingAssistant)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 // Test valid get attendance code for tutorial
 func TestValidGetAttendanceCodeForTutorial(t *testing.T) {
 	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
@@ -147,6 +159,18 @@ func TestValidGetAttendanceCodeForTutorial(t *testing.T) {
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
+// Test get attendance code for tutorial with invalid tutorial id
+func TestInvalidTutorialIDGetAttendanceCodeForTutorial(t *testing.T) {
+	_, testTeachingAssistant, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	_, status, _ := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/invalid"), "GET", testTeachingAssistant)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 // Test valid delete attendance code for tutorial
 func TestValidDeleteAttendanceCodeForTutorial(t *testing.T) {
 	_, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
@@ -171,6 +195,18 @@ func TestValidDeleteAttendanceCodeForTutorial(t *testing.T) {
 	// Clean up
 	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test delete attendance code for tutorial with invalid tutorial id
+func TestInvalidTutorialIDDeleteAttendanceCodeForTutorial(t *testing.T) {
+	_, testTeachingAssistant, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to generate attendance code for the tutorial
+	_, status, _ := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/invalid/delete"), "POST", testTeachingAssistant)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
@@ -220,6 +256,47 @@ func TestValidStudentMarkAttendance(t *testing.T) {
 	// Clean up
 	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test student mark attendance with invalid tutorial id
+func TestInvalidTutorialIDStudentMarkAttendance(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to mark attendance for the tutorial
+	_, status, _ := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/student/invalid/mark"), "POST", testStudent)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test student mark attendance with no attendance payload
+func TestIncorrectPayloadStudentMarkAttendance(t *testing.T) {
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to mark attendance for the tutorial
+	_, status, _ := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", testStudent)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+// Test student mark attendance with incorrect format of attendance payload
+func TestIncorrectFormatPayloadStudentMarkAttendance(t *testing.T) {
+	testStudent, _, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	invalidPayload := struct {
+		RandomNumber int
+	}{
+		RandomNumber: 123,
+	}
+	// Send a request to mark attendance for the tutorial
+	_, status, _ := CreateStudentAuthenticatedMockRequest(invalidPayload, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", testStudent)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Clean up
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
@@ -458,6 +535,18 @@ func TestValidGetTodayAttendanceForTutorial(t *testing.T) {
 	CleanupCreatedTutorial(testTutorial)
 }
 
+// Test get today attendance for tutorial with invalid tutorial id
+func TestInvalidTutorialIDGetTodayAttendanceForTutorial(t *testing.T) {
+	_, testTeachingAssistant, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to get today attendance for the tutorial
+	_, status, _ := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/invalid/list"), "GET", testTeachingAssistant)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 // Test valid get all attendance for tutorial
 func TestValidGetAllAttendanceForTutorial(t *testing.T) {
 	testStudentModels := []models.Student{}
@@ -626,6 +715,18 @@ func TestValidGetAllAttendanceForTutorial(t *testing.T) {
 	CleanupCreatedStudent(testDefaultStudent)
 	CleanupCreatedTeachingAssistant(testTeachingAssistant)
 	CleanupCreatedTutorial(testTutorial)
+}
+
+// Test get all attendance for tutorial with invalid tutorial id
+func TestInvalidTutorialIDGetAllAttendanceForTutorial(t *testing.T) {
+	_, testTeachingAssistant, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.Nil(t, err)
+	// Send a request to get all attendance for the tutorial
+	_, status, _ := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/invalid/list/all"), "GET", testTeachingAssistant)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Clean up
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
 // Test valid get all attendance for student
