@@ -1,12 +1,11 @@
 package auth
 
-import "strings"
-
 type Role struct {
 	UserType string `json:"userType"`
 	Privilege int `json:"privilege"`
 }
 
+// The roles for the 2 types of users that use our application
 var (
 	RoleTeachingAssistant = Role {
 		UserType: "teachingAssistant",
@@ -18,12 +17,3 @@ var (
 		Privilege: 2,
 	}
 )
-
-func GetRoleByEmail(email string) Role {
-	// Use regex function
-	if strings.Contains(email, "student") {
-		return RoleStudent
-	} 
-	
-	return RoleTeachingAssistant
-}

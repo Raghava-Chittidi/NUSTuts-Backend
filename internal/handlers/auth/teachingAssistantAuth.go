@@ -10,10 +10,7 @@ import (
 )
 
 func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
-	var payload struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var payload api.LoginPayload
 
 	err := util.ReadJSON(w, r, &payload)
 	if err != nil {
@@ -21,12 +18,14 @@ func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if email provided exists
 	teachingAssistant, err := data.GetTeachingAssistantByEmail(payload.Email)
 	if err != nil {
 		util.ErrorJSON(w, errors.New("invalid credentials"), http.StatusNotFound)
 		return
 	}
 
+	// Check if password provided is valid
 	valid, err := util.VerifyPassword(payload.Password, teachingAssistant.Password)
 	if err != nil || !valid {
 		util.ErrorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
@@ -61,6 +60,7 @@ func LoginAsTeachingAssistant(w http.ResponseWriter, r *http.Request) {
 		Tokens: 	 tokens,
 	}
 	
+	// Generate and set new refresh cookie
 	refreshCookie := auth.AuthObj.GenerateRefreshCookie(tokens.RefreshToken)
 	http.SetCookie(w, refreshCookie)
 	util.WriteJSON(w, api.Response{Message: "Login successful", Data: authenticatedTeachingAssistant}, http.StatusOK)
