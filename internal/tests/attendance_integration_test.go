@@ -441,3 +441,157 @@ func TestValidGetTodayAttendanceForTutorial(t *testing.T) {
 	CleanupCreatedTeachingAssistant(testTeachingAssistant)
 	CleanupCreatedTutorial(testTutorial)
 }
+
+// Test valid get all attendance for tutorial
+func TestValidGetAllAttendanceForTutorial(t *testing.T) {
+	testStudentModels := []models.Student{}
+	testDefaultStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	for _, student := range testStudents {
+		// Create test TeachingAssistant, Student, Tutorial
+		student, err := CreateMockStudent(&student, testTeachingAssistant, testTutorial)
+		assert.NoError(t, err)
+		testStudentModels = append(testStudentModels, *student)
+	}
+
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var generatedAttendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &generatedAttendanceStringResponse)
+	assert.NoError(t, err)
+
+	for i, student := range testStudentModels {
+		// Mark attendance
+		markAttendancePayload := api.MarkAttendancePayload{
+			StudentID:      int(testStudentModels[i].ID),
+			AttendanceCode: generatedAttendanceStringResponse.AttendanceString.Code,
+		}
+
+		_, status, _ = CreateStudentAuthenticatedMockRequest(markAttendancePayload, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", &student)
+		assert.Equal(t, http.StatusOK, status)
+	}
+
+	// Generate 2 attendance records for date 1 day before today, 2 days before today
+	for i := 1; i <= 2; i++ {
+		dataaccess.GenerateAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+	}
+
+	// Send a request to get all attendance for the tutorial
+	res, status, err = CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/list/all", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ = json.Marshal(response.Data)
+
+	var attendanceListsResponse api.AttendanceListsByDateResponse
+	err = json.Unmarshal(resData, &attendanceListsResponse)
+	assert.NoError(t, err)
+
+	// Expected today attendance list for the tutorial
+	expectedAttendanceList := api.AttendanceListsByDateResponse{
+		AttendanceLists: []api.AttendanceListByDate{
+			{
+				Date: time.Now().Format("2006-01-02"),
+				Attendance: []api.AttendanceResponse{
+					{
+						Student:    *testDefaultStudent,
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[0],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().Format("2006-01-02"),
+						Present:    true,
+					},
+					{
+						Student:    testStudentModels[1],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().Format("2006-01-02"),
+						Present:    true,
+					},
+					{
+						Student:    testStudentModels[2],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().Format("2006-01-02"),
+						Present:    true,
+					},
+				},
+			},
+			{
+				Date: time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+				Attendance: []api.AttendanceResponse{
+					{
+						Student:    *testDefaultStudent,
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[0],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[1],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[2],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Present:    false,
+					},
+				},
+			},
+			{
+				Date: time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+				Attendance: []api.AttendanceResponse{
+					{
+						Student:    *testDefaultStudent,
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[0],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[1],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Present:    false,
+					},
+					{
+						Student:    testStudentModels[2],
+						TutorialID: int(testTutorial.ID),
+						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Present:    false,
+					},
+				},
+			},
+		},
+	}
+
+	assertEqualAttendanceListsByDateResponse(t, &expectedAttendanceList, &attendanceListsResponse)
+}

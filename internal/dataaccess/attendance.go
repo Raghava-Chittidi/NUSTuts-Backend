@@ -111,6 +111,23 @@ func GenerateTodayAttendanceByTutorialID(tutorialId int) error {
 	return nil
 }
 
+func GenerateAttendanceForDateByTutorialID(date string, tutorialId int) error {
+	studentIds, err := GetAllStudentIdsOfStudentsInTutorial(tutorialId)
+	if err != nil {
+		return err
+	}
+
+	for _, studentId := range *studentIds {
+		attendance := &models.Attendance{StudentID: studentId, TutorialID: tutorialId, Date: date}
+		result := database.DB.Table("attendances").Create(attendance)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
+}
+
 func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
 	date := time.Now().UTC().Format("2006-01-02")
 	attendances, err := GetAttendanceByDateAndTutorialID(date, tutorialId)
@@ -131,12 +148,12 @@ func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
 func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 	var attendanceString models.AttendanceString
 	result := database.DB.Table("attendance_strings").Where("code = ?", attendanceCode).
-				Where("tutorial_id = ?", tutorialId).First(&attendanceString)
+		Where("tutorial_id = ?", tutorialId).First(&attendanceString)
 	if result.Error != nil {
 		return false, result.Error
 	}
 
-	if attendanceString.ExpiresAt.Before(time.Now())  {
+	if attendanceString.ExpiresAt.Before(time.Now()) {
 		return false, nil
 	}
 
@@ -147,7 +164,7 @@ func MarkPresent(studentId int, tutorialId int) error {
 	var attendance models.Attendance
 	date := time.Now().UTC().Format("2006-01-02")
 	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
-			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
+		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -161,7 +178,7 @@ func GetTodayAttendanceByStudentId(studentId int, tutorialId int) (*models.Atten
 	var attendance models.Attendance
 	date := time.Now().UTC().Format("2006-01-02")
 	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
-			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
+		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
 		return nil, result.Error
 	}
