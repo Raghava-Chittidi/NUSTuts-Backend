@@ -5,6 +5,23 @@ import (
 	"NUSTuts-Backend/internal/models"
 )
 
+func JoinTutorial(studentId int, tutorialId int) error {
+	register := &models.Registry{StudentID: studentId, TutorialID: tutorialId}
+	result := database.DB.Table("registries").Create(register)
+	return result.Error
+}
+
+func GetRegistryByStudentIDAndTutorialID(studentId int, tutorialId int) (*models.Registry, error) {
+	var registry models.Registry
+	result := database.DB.Table("registries").Where("student_id = ?", studentId).
+			Where("tutorial_id = ?", tutorialId).Find(&registry)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &registry, nil
+}
+
 func GetTutorialsByStudentId(id int) (*[]models.Tutorial, error) {
 	var tutorials []models.Tutorial
 	result := database.DB.Table("tutorials").Joins("JOIN registries ON tutorials.id = registries.tutorial_id").
@@ -35,23 +52,6 @@ func CheckIfStudentInTutorialById(studentId int, tutorialId int) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func JoinTutorial(studentId int, tutorialId int) error {
-	register := &models.Registry{StudentID: studentId, TutorialID: tutorialId}
-	result := database.DB.Table("registries").Create(register)
-	return result.Error
-}
-
-func GetRegistryByStudentIDAndTutorialID(studentId int, tutorialId int) (*models.Registry, error) {
-	var registry models.Registry
-	result := database.DB.Table("registries").Where("student_id = ?", studentId).
-			Where("tutorial_id = ?", tutorialId).Find(&registry)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return &registry, nil
 }
 
 func DeleteRegistryByStudentAndTutorial(student *models.Student, tutorial *models.Tutorial) error {
