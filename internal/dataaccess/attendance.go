@@ -145,6 +145,22 @@ func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
 	return nil
 }
 
+func DeleteAttendanceForDateByTutorialID(date string, tutorialId int) error {
+	attendances, err := GetAttendanceByDateAndTutorialID(date, tutorialId)
+	if err != nil {
+		return err
+	}
+
+	for _, attendance := range *attendances {
+		result := database.DB.Table("attendances").Delete(&attendance)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
+}
+
 func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 	var attendanceString models.AttendanceString
 	result := database.DB.Table("attendance_strings").Where("code = ?", attendanceCode).

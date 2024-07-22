@@ -21,6 +21,22 @@ func assertEqualAttendanceResponse(t *testing.T, expected *api.AttendanceRespons
 	assert.Equal(t, expected.TutorialID, actual.TutorialID)
 }
 
+// Assert attendance model
+func assertEqualAttendanceModel(t *testing.T, expected *models.Attendance, actual *models.Attendance) {
+	assert.Equal(t, expected.StudentID, actual.StudentID)
+	assert.Equal(t, expected.TutorialID, actual.TutorialID)
+	assert.Equal(t, expected.Date, actual.Date)
+	assert.Equal(t, expected.Present, actual.Present)
+}
+
+// Assert student attendance response
+func assertEqualStudentAttendanceResponse(t *testing.T, expected *api.StudentAttendanceResponse, actual *api.StudentAttendanceResponse) {
+	assert.Equal(t, len(expected.Attendance), len(actual.Attendance))
+	for i, expectedAttendance := range expected.Attendance {
+		assertEqualAttendanceModel(t, &expectedAttendance, &actual.Attendance[i])
+	}
+}
+
 // Asserts whether the two attendance lists by date response are equal by comparing their fields
 func assertEqualAttendanceListsByDateResponse(t *testing.T, expected *api.AttendanceListsByDateResponse, actual *api.AttendanceListsByDateResponse) {
 	assert.Equal(t, len(expected.AttendanceLists), len(actual.AttendanceLists))
@@ -594,4 +610,123 @@ func TestValidGetAllAttendanceForTutorial(t *testing.T) {
 	}
 
 	assertEqualAttendanceListsByDateResponse(t, &expectedAttendanceList, &attendanceListsResponse)
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+
+	for i := 1; i <= 2; i++ {
+		dataaccess.DeleteAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+	}
+
+	// Clean up students, ta, tutorial
+	for _, student := range testStudentModels {
+		CleanupCreatedStudent(&student)
+	}
+	CleanupCreatedStudent(testDefaultStudent)
+	CleanupCreatedTeachingAssistant(testTeachingAssistant)
+	CleanupCreatedTutorial(testTutorial)
+}
+
+// Test valid get all attendance for student
+func TestValidGetStudentAttendance(t *testing.T) {
+	testStudentModels := []models.Student{}
+	testDefaultStudent, testTeachingAssistant, testTutorial, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	for _, student := range testStudents {
+		// Create test TeachingAssistant, Student, Tutorial
+		student, err := CreateMockStudent(&student, testTeachingAssistant, testTutorial)
+		assert.NoError(t, err)
+		testStudentModels = append(testStudentModels, *student)
+	}
+
+	// Send a request to generate attendance code for the tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/%d/generate", int(testTutorial.ID)), "GET", testTeachingAssistant)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual attendance string for the tutorial
+	var generatedAttendanceStringResponse api.AttendanceStringResponse
+	err = json.Unmarshal(resData, &generatedAttendanceStringResponse)
+	assert.NoError(t, err)
+
+	for i, student := range testStudentModels {
+		// Mark attendance
+		markAttendancePayload := api.MarkAttendancePayload{
+			StudentID:      int(testStudentModels[i].ID),
+			AttendanceCode: generatedAttendanceStringResponse.AttendanceString.Code,
+		}
+
+		_, status, _ = CreateStudentAuthenticatedMockRequest(markAttendancePayload, fmt.Sprintf("/api/attendance/student/%d/mark", int(testTutorial.ID)), "POST", &student)
+		assert.Equal(t, http.StatusOK, status)
+	}
+
+	// Generate 2 attendance records for date 1 day before today, 2 days before today
+	for i := 1; i <= 2; i++ {
+		dataaccess.GenerateAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+	}
+
+	for _, student := range testStudentModels {
+		// Send a request to get student attendance for the tutorial
+		res, status, err = CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/attendance/student/%d/attendance/%d", int(testTutorial.ID), int(student.ID)), "GET", &student)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, status)
+
+		// Get response in json
+		err = json.Unmarshal(res, &response)
+		assert.NoError(t, err)
+		resData, _ = json.Marshal(response.Data)
+
+		var studentAttendanceResponse api.StudentAttendanceResponse
+		err = json.Unmarshal(resData, &studentAttendanceResponse)
+		assert.NoError(t, err)
+
+		// Expected
+		expectedStudentAttendanceResponse := api.StudentAttendanceResponse{
+			Attendance: []models.Attendance{
+				{
+					StudentID:  int(student.ID),
+					TutorialID: int(testTutorial.ID),
+					Date:       time.Now().Format("2006-01-02"),
+					Present:    true,
+				},
+				{
+					StudentID:  int(student.ID),
+					TutorialID: int(testTutorial.ID),
+					Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+					Present:    false,
+				},
+				{
+					StudentID:  int(student.ID),
+					TutorialID: int(testTutorial.ID),
+					Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+					Present:    false,
+				},
+			},
+		}
+
+		assertEqualStudentAttendanceResponse(t, &expectedStudentAttendanceResponse, &studentAttendanceResponse)
+	}
+
+	// Clean up
+	dataaccess.DeleteGeneratedAttendanceString(int(testTutorial.ID))
+	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
+
+	for i := 1; i <= 2; i++ {
+		dataaccess.DeleteAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+	}
+
+	// Clean up students, ta, tutorial
+	for _, student := range testStudentModels {
+		CleanupCreatedStudent(&student)
+	}
+	CleanupCreatedStudent(testDefaultStudent)
+	CleanupCreatedTeachingAssistant(testTeachingAssistant)
+	CleanupCreatedTutorial(testTutorial)
 }
