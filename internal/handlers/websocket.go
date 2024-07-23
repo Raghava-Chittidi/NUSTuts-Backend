@@ -25,10 +25,11 @@ var Upgrader = websocket.Upgrader{
 	},
 }
 
+// Creates chat room for that tutorial
 func CreateRoom(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
@@ -44,16 +45,17 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Created!"}, http.StatusOK)
 }
 
+// Called when a user visits their tutorial page
 func JoinRoom(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 
 	userId, err := strconv.Atoi(r.URL.Query().Get("userId"))
 	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
+		util.ErrorJSON(w, err)
 		return
 	}
 

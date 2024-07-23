@@ -6,13 +6,14 @@ import (
 	"errors"
 )
 
-func CheckIfNameExistsForTutorialIDAndWeek(tutorialId int, filename string, week int) error {
+// Checks whether filename already exists for a given tutorial id and week number
+func CheckIfFilenameExistsForTutorialIDAndWeek(tutorialId int, filename string, week int) (bool, error) {
 	tutorialFile, _ := GetTutorialFileFromTutorialIDAndFilename(tutorialId, filename, week)
 	if tutorialFile != nil {
-		return errors.New("filename already exists")
+		return true, errors.New("filename already exists")
 	}
 
-	return nil
+	return false, nil
 }
 
 func CreateTutorialFile(tutorialId int, filename string, week int, filepath string) error {

@@ -6,13 +6,14 @@ import (
 	"NUSTuts-Backend/internal/util"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/samber/lo"
 )
 
+// Created a tutorial for every single module available in NUS
 func CreateTutorialsForEveryModule() error {
+	// Send a request to get the list of modules for this current Academic Year
 	res, err := http.Get(fmt.Sprintf("https://api.nusmods.com/v2/%s/moduleList.json", util.GetCurrentAY()))
 	if err != nil {
 		return err
@@ -31,6 +32,10 @@ func CreateTutorialsForEveryModule() error {
 		return err
 	}
 
+	/* 
+		Filter such that each module's list of semesters only contains the current semester or 
+		nothing if that module is not taught during the current semester 
+	*/
 	modulesList = lo.Map(modulesList, func(item Module, index int) Module {
 		item.Semesters = lo.Filter(item.Semesters, func(sem int, index int) bool {
 			return sem == util.GetCurrentSem()
@@ -39,17 +44,17 @@ func CreateTutorialsForEveryModule() error {
 		return item
 	})
 
+	// Filter out the modules that will not be taught during the current semester
 	modulesList = lo.Filter(modulesList, func(item Module, index int) bool {
 		return len(modulesList[index].Semesters) > 0
 	})
 
-	// fmt.Println(len(modulesList))
 
 	for i, module := range modulesList {
-		fmt.Println(i)
+		// Get the module information for each module in the list
 		res1, err := http.Get(fmt.Sprintf("https://api.nusmods.com/v2/%s/modules/%s.json", util.GetCurrentAY(), module.ModuleCode))
 		if err != nil {
-			fmt.Println("err0")
+			fmt.Printf("Failed to fetch module - %s info", module.ModuleCode)
 			return err
 		}
 
@@ -92,6 +97,7 @@ func CreateTutorialsForEveryModule() error {
 			continue
 		}
 
+		// Double check to see if that module is taught in the current semester
 		curSem, found := lo.Find(moduleInfo.SemesterData, func(item SemesterData) bool {
 			return item.Semester == util.GetCurrentSem()
 		})
@@ -100,6 +106,7 @@ func CreateTutorialsForEveryModule() error {
 			continue
 		}
 		
+		// Get the list of all the tutorials for the module
 		tutorials := lo.Filter(curSem.Timetable, func(item Tutorial, index int) bool {
 			return item.LessonType == "Tutorial"
 		})
@@ -108,9 +115,8 @@ func CreateTutorialsForEveryModule() error {
 			continue
 		}
 
+		// Create a Tutorial and a Teaching Assistant for each tutorial in the module's tutorial list 
 		for j, item := range tutorials {
-			log.Println("inserting")
-
 			name := fmt.Sprintf("ta%d", 200 * i + j)
 			email := fmt.Sprintf("%s@gmail.com", name)
 			passwordHash, err := util.GetPasswordHash(name)
@@ -131,6 +137,7 @@ func CreateTutorialsForEveryModule() error {
 				return err
 			}
 
+			// Assign the created Teaching Assistant to this tutorial created
 			teachingAssistant.TutorialID = int(tutorial.ID)
 			database.DB.Save(&teachingAssistant)
 		}
@@ -175,16 +182,7 @@ func GetAllTutorialIDs() (*[]int, error) {
 	return &tutorialIds, nil
 }
 
-func CheckIfStudentInTutorialById(studentId int, tutorialId int) (bool, error) {
-	var registry models.Registry
-	result := database.DB.Table("registries").Where("tutorial_id = ?", tutorialId).Where("student_id = ?", studentId).First(&registry)
-	if result.Error != nil {
-		return false, result.Error
-	}
-
-	return true, nil
-}
-
+// Checks if the teaching assistant teaches that tutorial
 func CheckIfTeachingAssistantInTutorialById(teachingAssistantId int, tutorialId int) (bool, error) {
 	var tutorial models.Tutorial
 	result := database.DB.Table("tutorials").Where("id = ?", tutorialId).Where("teaching_assistant_id = ?", teachingAssistantId).First(&tutorial)
@@ -201,7 +199,7 @@ func DeleteTutorialById(id int) error {
 		return err
 	}
 
-	result := database.DB.Table("tutorials").Delete(&tutorial)
+	result := database.DB.Unscoped().Table("tutorials").Delete(&tutorial)
 	if result.Error != nil {
 		return result.Error
 	}

@@ -37,7 +37,7 @@ func DeleteTeachingAssistantById(id int) error {
 		return err
 	}
 
-	result := database.DB.Table("teaching_assistants").Delete(&teachingAssistant)
+	result := database.DB.Unscoped().Table("teaching_assistants").Delete(&teachingAssistant)
 	if result.Error != nil {
 		return result.Error
 	}

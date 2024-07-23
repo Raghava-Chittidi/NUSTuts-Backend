@@ -33,6 +33,7 @@ func InitialiseAuthObj() error {
 	return nil
 }
 
+// Generate access and refresh tokens for the authenticated user
 func (a *Auth) GenerateTokens(user *AuthenticatedUser) (Tokens, error) {
 	accessToken := jwt.New(jwt.SigningMethodHS256)
 	claims := accessToken.Claims.(jwt.MapClaims)
@@ -104,6 +105,7 @@ func (a *Auth) DeleteRefreshCookie() *http.Cookie {
 	}
 }
 
+// Verifies whether the access token sent in the Authorization header is valid
 func (a *Auth) VerifyToken(w http.ResponseWriter, r *http.Request) (string, *Claims, error) {
 	w.Header().Add("Vary", "Authorization")
 	authHeader := r.Header.Get("Authorization")
@@ -111,6 +113,7 @@ func (a *Auth) VerifyToken(w http.ResponseWriter, r *http.Request) (string, *Cla
 		return "", nil, errors.New("no authorization header")
 	}
 
+	// Check if access token is present and in valid format
 	arr := strings.Split(authHeader, " ")
 	if len(arr) != 2 || arr[0] != "Bearer" {
 		return "", nil, errors.New("invalid authorization header")
@@ -119,6 +122,7 @@ func (a *Auth) VerifyToken(w http.ResponseWriter, r *http.Request) (string, *Cla
 	token := arr[1]
 	claims := &Claims{}
 
+	// Check whether the provided access token is signed with the correct method
 	_, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -127,10 +131,6 @@ func (a *Auth) VerifyToken(w http.ResponseWriter, r *http.Request) (string, *Cla
 
 		return []byte(a.Secret), nil
 	})
-
-	// log.Default().Print("Token: ", token)
-	// log.Default().Println("Issued at ", claims.IssuedAt)
-	// log.Default().Println("Expires at ", claims.ExpiresAt)
 
 	if err != nil {
 		return "", nil, err

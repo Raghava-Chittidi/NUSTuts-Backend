@@ -11,6 +11,7 @@ func CreateDiscussion(id int) error {
 	return result.Error
 }
 
+// Creates a dicussion for each tutorial present in the database
 func CreateDiscussionForEveryTutorial() error {
 	tutorialIds, err := GetAllTutorialIDs()
 	if err != nil {
