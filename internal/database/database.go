@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -12,11 +11,11 @@ import (
 var DB *gorm.DB
 
 func Connect(isTestDb ...bool) error {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatalln("Failed to load env file!")
-		return err
-	}
+	// err := godotenv.Load("../../.env")
+	// if err != nil {
+	// 	log.Fatalln("Failed to load env file!")
+	// 	return err
+	// }
 
 	var dbUrl string
 	// Check whether we want to connect to the test database (during testing) or the actual database
