@@ -18,7 +18,7 @@ func CreateRandomAttendanceString(tutorialId int) (*models.AttendanceString, err
 	}
 
 	code := string(bytesArr)
-	attendanceString := &models.AttendanceString{Code: code, TutorialID: tutorialId, ExpiresAt: time.Now().Add(time.Minute * AttendanceCodeDuration)}
+	attendanceString := &models.AttendanceString{Code: code, TutorialID: tutorialId, ExpiresAt: time.Now().UTC().Add(time.Minute * AttendanceCodeDuration)}
 	result := database.DB.Table("attendance_strings").Create(attendanceString)
 	if result.Error != nil {
 		return nil, result.Error
@@ -169,7 +169,7 @@ func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 		return false, result.Error
 	}
 
-	if attendanceString.ExpiresAt.Before(time.Now()) {
+	if attendanceString.ExpiresAt.Before(time.Now().UTC()) {
 		return false, nil
 	}
 

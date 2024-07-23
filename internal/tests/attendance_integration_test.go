@@ -93,7 +93,7 @@ func TestValidGenerateAttendanceCodeForTutorial(t *testing.T) {
 	expectedAttendanceString := api.AttendanceStringResponse{
 		AttendanceString: models.AttendanceString{
 			Code:       attendanceStringResponse.AttendanceString.Code,
-			ExpiresAt:  time.Now().Add(time.Minute * AttendanceCodeDuration), // within margin of error testing
+			ExpiresAt:  time.Now().UTC().Add(time.Minute * AttendanceCodeDuration), // within margin of error testing
 			TutorialID: int(testTutorial.ID),
 		},
 	}
@@ -250,7 +250,7 @@ func TestValidStudentMarkAttendance(t *testing.T) {
 	assert.NotNil(t, attendance)
 	assert.Equal(t, int(testStudent.ID), attendance.StudentID)
 	assert.Equal(t, int(testTutorial.ID), attendance.TutorialID)
-	assert.Equal(t, time.Now().Format("2006-01-02"), attendance.Date)
+	assert.Equal(t, time.Now().UTC().Format("2006-01-02"), attendance.Date)
 	assert.Equal(t, true, attendance.Present)
 
 	// Clean up
@@ -439,25 +439,25 @@ func TestValidGetTodayAttendanceForTutorial(t *testing.T) {
 			{
 				Student:    *testDefaultStudent,
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    false,
 			},
 			{
 				Student:    testStudentModels[0],
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    false,
 			},
 			{
 				Student:    testStudentModels[1],
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    false,
 			},
 			{
 				Student:    testStudentModels[2],
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    false,
 			},
 		},
@@ -496,25 +496,25 @@ func TestValidGetTodayAttendanceForTutorial(t *testing.T) {
 			{
 				Student:    *testDefaultStudent,
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    false,
 			},
 			{
 				Student:    testStudentModels[0],
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    true,
 			},
 			{
 				Student:    testStudentModels[1],
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    true,
 			},
 			{
 				Student:    testStudentModels[2],
 				TutorialID: int(testTutorial.ID),
-				Date:       time.Now().Format("2006-01-02"),
+				Date:       time.Now().UTC().Format("2006-01-02"),
 				Present:    true,
 			},
 		},
@@ -588,7 +588,7 @@ func TestValidGetAllAttendanceForTutorial(t *testing.T) {
 
 	// Generate 2 attendance records for date 1 day before today, 2 days before today
 	for i := 1; i <= 2; i++ {
-		dataaccess.GenerateAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+		dataaccess.GenerateAttendanceForDateByTutorialID(time.Now().UTC().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
 	}
 
 	// Send a request to get all attendance for the tutorial
@@ -609,88 +609,88 @@ func TestValidGetAllAttendanceForTutorial(t *testing.T) {
 	expectedAttendanceList := api.AttendanceListsByDateResponse{
 		AttendanceLists: []api.AttendanceListByDate{
 			{
-				Date: time.Now().Format("2006-01-02"),
+				Date: time.Now().UTC().Format("2006-01-02"),
 				Attendance: []api.AttendanceResponse{
 					{
 						Student:    *testDefaultStudent,
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().Format("2006-01-02"),
+						Date:       time.Now().UTC().Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[0],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().Format("2006-01-02"),
+						Date:       time.Now().UTC().Format("2006-01-02"),
 						Present:    true,
 					},
 					{
 						Student:    testStudentModels[1],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().Format("2006-01-02"),
+						Date:       time.Now().UTC().Format("2006-01-02"),
 						Present:    true,
 					},
 					{
 						Student:    testStudentModels[2],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().Format("2006-01-02"),
+						Date:       time.Now().UTC().Format("2006-01-02"),
 						Present:    true,
 					},
 				},
 			},
 			{
-				Date: time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+				Date: time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02"),
 				Attendance: []api.AttendanceResponse{
 					{
 						Student:    *testDefaultStudent,
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[0],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[1],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[2],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02"),
 						Present:    false,
 					},
 				},
 			},
 			{
-				Date: time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+				Date: time.Now().UTC().AddDate(0, 0, -2).Format("2006-01-02"),
 				Attendance: []api.AttendanceResponse{
 					{
 						Student:    *testDefaultStudent,
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -2).Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[0],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -2).Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[1],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -2).Format("2006-01-02"),
 						Present:    false,
 					},
 					{
 						Student:    testStudentModels[2],
 						TutorialID: int(testTutorial.ID),
-						Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+						Date:       time.Now().UTC().AddDate(0, 0, -2).Format("2006-01-02"),
 						Present:    false,
 					},
 				},
@@ -705,7 +705,7 @@ func TestValidGetAllAttendanceForTutorial(t *testing.T) {
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
 
 	for i := 1; i <= 2; i++ {
-		dataaccess.DeleteAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+		dataaccess.DeleteAttendanceForDateByTutorialID(time.Now().UTC().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
 	}
 
 	// Clean up students, ta, tutorial
@@ -770,7 +770,7 @@ func TestValidGetStudentAttendance(t *testing.T) {
 
 	// Generate 2 attendance records for date 1 day before today, 2 days before today
 	for i := 1; i <= 2; i++ {
-		dataaccess.GenerateAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+		dataaccess.GenerateAttendanceForDateByTutorialID(time.Now().UTC().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
 	}
 
 	for _, student := range testStudentModels {
@@ -794,19 +794,19 @@ func TestValidGetStudentAttendance(t *testing.T) {
 				{
 					StudentID:  int(student.ID),
 					TutorialID: int(testTutorial.ID),
-					Date:       time.Now().Format("2006-01-02"),
+					Date:       time.Now().UTC().Format("2006-01-02"),
 					Present:    true,
 				},
 				{
 					StudentID:  int(student.ID),
 					TutorialID: int(testTutorial.ID),
-					Date:       time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
+					Date:       time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02"),
 					Present:    false,
 				},
 				{
 					StudentID:  int(student.ID),
 					TutorialID: int(testTutorial.ID),
-					Date:       time.Now().AddDate(0, 0, -2).Format("2006-01-02"),
+					Date:       time.Now().UTC().AddDate(0, 0, -2).Format("2006-01-02"),
 					Present:    false,
 				},
 			},
@@ -820,7 +820,7 @@ func TestValidGetStudentAttendance(t *testing.T) {
 	dataaccess.DeleteTodayAttendanceByTutorialID(int(testTutorial.ID))
 
 	for i := 1; i <= 2; i++ {
-		dataaccess.DeleteAttendanceForDateByTutorialID(time.Now().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
+		dataaccess.DeleteAttendanceForDateByTutorialID(time.Now().UTC().AddDate(0, 0, -i).Format("2006-01-02"), int(testTutorial.ID))
 	}
 
 	// Clean up students, ta, tutorial
