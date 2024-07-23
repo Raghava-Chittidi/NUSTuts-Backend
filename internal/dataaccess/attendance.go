@@ -89,7 +89,7 @@ func DeleteGeneratedAttendanceString(tutorialId int) error {
 		return err
 	}
 
-	result := database.DB.Table("attendance_strings").Delete(attendanceString)
+	result := database.DB.Unscoped().Table("attendance_strings").Delete(attendanceString)
 	return result.Error
 }
 
