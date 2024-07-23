@@ -18,7 +18,7 @@ func CreateRandomAttendanceString(tutorialId int) (*models.AttendanceString, err
 	}
 
 	code := string(bytesArr)
-	attendanceString := &models.AttendanceString{Code: code, TutorialID: tutorialId, ExpiresAt: time.Now().Add(time.Minute * AttendanceCodeDuration)}
+	attendanceString := &models.AttendanceString{Code: code, TutorialID: tutorialId, ExpiresAt: time.Now().UTC().Add(time.Minute * AttendanceCodeDuration)}
 	result := database.DB.Table("attendance_strings").Create(attendanceString)
 	if result.Error != nil {
 		return nil, result.Error
@@ -89,7 +89,7 @@ func DeleteGeneratedAttendanceString(tutorialId int) error {
 		return err
 	}
 
-	result := database.DB.Table("attendance_strings").Delete(attendanceString)
+	result := database.DB.Unscoped().Table("attendance_strings").Delete(attendanceString)
 	return result.Error
 }
 
@@ -100,6 +100,23 @@ func GenerateTodayAttendanceByTutorialID(tutorialId int) error {
 	}
 
 	date := time.Now().UTC().Format("2006-01-02")
+	for _, studentId := range *studentIds {
+		attendance := &models.Attendance{StudentID: studentId, TutorialID: tutorialId, Date: date}
+		result := database.DB.Table("attendances").Create(attendance)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
+}
+
+func GenerateAttendanceForDateByTutorialID(date string, tutorialId int) error {
+	studentIds, err := GetAllStudentIdsOfStudentsInTutorial(tutorialId)
+	if err != nil {
+		return err
+	}
+
 	for _, studentId := range *studentIds {
 		attendance := &models.Attendance{StudentID: studentId, TutorialID: tutorialId, Date: date}
 		result := database.DB.Table("attendances").Create(attendance)
@@ -128,15 +145,31 @@ func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
 	return nil
 }
 
+func DeleteAttendanceForDateByTutorialID(date string, tutorialId int) error {
+	attendances, err := GetAttendanceByDateAndTutorialID(date, tutorialId)
+	if err != nil {
+		return err
+	}
+
+	for _, attendance := range *attendances {
+		result := database.DB.Table("attendances").Delete(&attendance)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
+}
+
 func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 	var attendanceString models.AttendanceString
 	result := database.DB.Table("attendance_strings").Where("code = ?", attendanceCode).
-				Where("tutorial_id = ?", tutorialId).First(&attendanceString)
+		Where("tutorial_id = ?", tutorialId).First(&attendanceString)
 	if result.Error != nil {
 		return false, result.Error
 	}
 
-	if attendanceString.ExpiresAt.Before(time.Now())  {
+	if attendanceString.ExpiresAt.Before(time.Now().UTC()) {
 		return false, nil
 	}
 
@@ -147,7 +180,7 @@ func MarkPresent(studentId int, tutorialId int) error {
 	var attendance models.Attendance
 	date := time.Now().UTC().Format("2006-01-02")
 	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
-			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
+		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -161,7 +194,7 @@ func GetTodayAttendanceByStudentId(studentId int, tutorialId int) (*models.Atten
 	var attendance models.Attendance
 	date := time.Now().UTC().Format("2006-01-02")
 	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
-			Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
+		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
 		return nil, result.Error
 	}

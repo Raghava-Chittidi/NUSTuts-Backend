@@ -174,12 +174,12 @@ func DeleteAttendanceString(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload api.DeleteAttendanceStringPayload
-	err = util.ReadJSON(w, r, &payload)
-	if err != nil {
-		util.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
+	// var payload api.DeleteAttendanceStringPayload
+	// err = util.ReadJSON(w, r, &payload)
+	// if err != nil {
+	// 	util.ErrorJSON(w, err, http.StatusBadRequest)
+	// 	return
+	// }
 
 	err = dataaccess.DeleteGeneratedAttendanceString(tutorialId)
 	if err != nil {
@@ -217,6 +217,7 @@ func VerifyAndMarkStudentAttendance(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		util.WriteJSON(w, api.Response{Message: "Your attendance has been marked successfully!"}, http.StatusOK)
+		return
 	}
 
 	util.WriteJSON(w, api.Response{Message: "Invalid code!", Data: nil}, http.StatusOK)
