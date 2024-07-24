@@ -11,7 +11,7 @@ import (
 
 func TestCreateRequest(t *testing.T) {
 	// Make sure requests table is empty
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 
 	// Current no. of requests in the test db should be 0
 	var count int64
@@ -27,12 +27,12 @@ func TestCreateRequest(t *testing.T) {
 	assert.Equal(t, 1, int(count))
 
 	// Cleanup
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
 func TestGetRequest(t *testing.T) {
 	// Make sure requests table is empty
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 
 	// Create a request
 	err := dataaccess.CreateRequest(1, 1)
@@ -59,12 +59,12 @@ func TestGetRequest(t *testing.T) {
 	assert.Equal(t, expectedRequest.Status, request.Status)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
 func TestAcceptRequest(t *testing.T) {
 	// Make sure requests table is empty
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 
 	// Create a request
 	err := dataaccess.CreateRequest(1, 1)
@@ -92,12 +92,12 @@ func TestAcceptRequest(t *testing.T) {
 	assert.Equal(t, "accepted", request.Status)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
 func TestRejectRequest(t *testing.T) {
 	// Make sure requests table is empty
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 
 	// Create a request
 	err := dataaccess.CreateRequest(1, 1)
@@ -125,12 +125,12 @@ func TestRejectRequest(t *testing.T) {
 	assert.Equal(t, "rejected", request.Status)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
 func TestGetPendingRequest(t *testing.T) {
 	// Make sure requests table is empty
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 
 	// Create 3 requests, 1 pending, 1 accepted, 1 rejected
 	err := dataaccess.CreateRequest(1, 1)
@@ -177,5 +177,5 @@ func TestGetPendingRequest(t *testing.T) {
 	assert.Equal(t, "pending", pendingRequests[0].Status)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }

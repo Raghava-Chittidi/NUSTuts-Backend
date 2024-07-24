@@ -12,7 +12,7 @@ import (
 
 func TestGenerateAttendanceString(t *testing.T) {
 	// Make sure attendance strings table is empty
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 
 	// Current no. of attendance strings in the test db should be 0
 	var count int64
@@ -37,12 +37,12 @@ func TestGenerateAttendanceString(t *testing.T) {
 	assert.InDelta(t, attendanceString.ExpiresAt.Unix(), time.Now().Add(time.Minute*dataaccess.AttendanceCodeDuration).Unix(), 1)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(attendanceString)
+	database.DB.Unscoped().Where("1 = 1").Delete(attendanceString)
 }
 
 func TestDeleteAttendanceString(t *testing.T) {
 	// Make sure attendance strings table is empty
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 
 	// Generate an attendance string
 	_, err := dataaccess.CreateRandomAttendanceString(int(testTutorial.ID))
@@ -62,12 +62,12 @@ func TestDeleteAttendanceString(t *testing.T) {
 	assert.Equal(t, 0, int(count))
 
 	// Cleanup
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 }
 
 func TestGetAttendanceStringByTutorialID(t *testing.T) {
 	// Make sure attendance strings table is empty
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 
 	// Generate an attendance string
 	attendanceString, err := dataaccess.CreateRandomAttendanceString(int(testTutorial.ID))
@@ -86,7 +86,7 @@ func TestGetAttendanceStringByTutorialID(t *testing.T) {
 	assert.Equal(t, attendanceString.ExpiresAt.Unix(), actualAttendanceString.ExpiresAt.Unix())
 
 	// Cleanup
-	database.DB.Unscoped().Delete(attendanceString)
+	database.DB.Unscoped().Where("1 = 1").Delete(attendanceString)
 }
 
 func TestVerifyAttendanceStringMatching(t *testing.T) {
@@ -103,12 +103,12 @@ func TestVerifyAttendanceStringMatching(t *testing.T) {
 	assert.Equal(t, true, isValidAttendanceCode)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(attendanceString)
+	database.DB.Unscoped().Where("1 = 1").Delete(attendanceString)
 }
 
 func TestVerifyAttendanceStringNotMatching(t *testing.T) {
 	// Make sure attendance strings table is empty
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 
 	// Generate an attendance string
 	attendanceString, err := dataaccess.CreateRandomAttendanceString(int(testTutorial.ID))
@@ -120,12 +120,12 @@ func TestVerifyAttendanceStringNotMatching(t *testing.T) {
 	assert.Equal(t, false, isValidAttendanceCode)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(attendanceString)
+	database.DB.Unscoped().Where("1 = 1").Delete(attendanceString)
 }
 
 func TestVerifyAttendanceStringExpired(t *testing.T) {
 	// Make sure attendance strings table is empty
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 
 	// Generate an attendance string
 	attendanceString, err := dataaccess.CreateRandomAttendanceString(int(testTutorial.ID))
@@ -140,12 +140,12 @@ func TestVerifyAttendanceStringExpired(t *testing.T) {
 	assert.Equal(t, false, isValidAttendanceCode)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(attendanceString)
+	database.DB.Unscoped().Where("1 = 1").Delete(attendanceString)
 }
 
 func TestVerifyAttendanceStringInvalidTutorialID(t *testing.T) {
 	// Make sure attendance strings table is empty
-	database.DB.Unscoped().Delete(&models.AttendanceString{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.AttendanceString{})
 
 	// Generate an attendance string
 	attendanceString, err := dataaccess.CreateRandomAttendanceString(int(testTutorial.ID))
@@ -157,5 +157,5 @@ func TestVerifyAttendanceStringInvalidTutorialID(t *testing.T) {
 	assert.Equal(t, false, isValidAttendanceCode)
 
 	// Cleanup
-	database.DB.Unscoped().Delete(attendanceString)
+	database.DB.Unscoped().Where("1 = 1").Delete(attendanceString)
 }
