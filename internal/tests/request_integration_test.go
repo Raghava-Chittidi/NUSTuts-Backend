@@ -573,4 +573,5 @@ func TestGetUnrequestedTutorialClassNoNonExistingStudentID(t *testing.T) {
 	// Cleanup
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Tutorial{})
 }
