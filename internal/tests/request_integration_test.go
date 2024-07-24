@@ -261,3 +261,73 @@ func TestValidGetPendingRequests(t *testing.T) {
 	CleanupCreatedTeachingAssistant(testTeachingAssistant)
 	CleanupCreatedTutorial(testDefaultTutorial)
 }
+
+func TestValidUnrequestedTutorialClassNo(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	// Create test tutorial classes
+	_, err = dataaccess.CreateTutorial("1", "CS2040S", 50)
+	assert.NoError(t, err)
+	_, err = dataaccess.CreateTutorial("2", "CS2040S", 100)
+	assert.NoError(t, err)
+	_, err = dataaccess.CreateTutorial("3", "CS2040S", 101)
+	assert.NoError(t, err)
+
+	// Create a request to join tutorial
+	requestToJoinTut1Payload := api.RequestToJoinTutorialPayload{
+		StudentID:  int(testStudent.ID),
+		ModuleCode: "CS2040S",
+		ClassNo:    "2",
+	}
+	requestToJoinTut2Payload := api.RequestToJoinTutorialPayload{
+		StudentID:  int(testStudent.ID),
+		ModuleCode: "CS2040S",
+		ClassNo:    "3",
+	}
+	_, status, err := CreateStudentAuthenticatedMockRequest(requestToJoinTut1Payload, fmt.Sprintf("/api/requests/"), "POST", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+	_, status, err = CreateStudentAuthenticatedMockRequest(requestToJoinTut2Payload, fmt.Sprintf("/api/requests/"), "POST", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, status)
+
+	// Get unrequested tutorial classes
+	classesRes, status, err := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/requests/%d/CS2040S", int(testStudent.ID)), "GET", testStudent)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Get response in json
+	var response api.Response
+	err = json.Unmarshal(classesRes, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+
+	// Get actual unrequested classes for the tutorial
+	var unrequestedClasses []string
+	err = json.Unmarshal(resData, &unrequestedClasses)
+	assert.NoError(t, err)
+
+	// Log the unrequested classes
+	fmt.Println(unrequestedClasses)
+
+	// Assert that unrequested classes length is equal to 2
+	assert.Equal(t, 2, len(unrequestedClasses))
+	// Assert that the unrequested classes contains the correct class no
+	assert.Contains(t, unrequestedClasses, "2")
+	assert.Contains(t, unrequestedClasses, "3")
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	// Delete the test tutorial
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Tutorial{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
