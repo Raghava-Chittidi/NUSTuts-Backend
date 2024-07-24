@@ -411,6 +411,36 @@ func TestValidGetPendingRequests(t *testing.T) {
 	CleanupCreatedTutorial(testDefaultTutorial)
 }
 
+func TestGetPendingNonExistingRequestTutorialID(t *testing.T) {
+	_, testTA, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Get all pending requests for a non-existing tutorial
+	res, status, err := CreateTeachingAssistantAuthenticatedMockRequest(nil, fmt.Sprintf("/api/requests/%d", 100), "GET", testTA)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+
+	// Assert that the response is empty
+	var response api.Response
+	err = json.Unmarshal(res, &response)
+	assert.NoError(t, err)
+	resData, _ := json.Marshal(response.Data)
+	// Get actual attendance string for the tutorial
+	var requestsResponse []api.RequestResponse
+	err = json.Unmarshal(resData, &requestsResponse)
+	assert.NoError(t, err)
+
+	// Assert that request response length is equal to 0
+	assert.Equal(t, 0, len(requestsResponse))
+
+	// Cleanup
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+}
+
 func TestValidUnrequestedTutorialClassNo(t *testing.T) {
 	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.NoError(t, err)
