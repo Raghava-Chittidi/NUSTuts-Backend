@@ -62,6 +62,113 @@ func TestValidRequestToJoinTutorial(t *testing.T) {
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
+func TestInvalidRequestFormatToJoinTutorial(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty, arbitray where
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	invalidFormatPayload := struct {
+		InvalidField string `json:"invalid_field"`
+	}{
+		InvalidField: "invalid",
+	}
+
+	// Create a request to join tutorial with invalid payload
+	_, status, _ := CreateStudentAuthenticatedMockRequest(invalidFormatPayload, fmt.Sprintf("/api/requests/"), "POST", testStudent)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+func TestNonExistingModuleRequestToJoinTutorial(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty, arbitray where
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	// Create a request to join tutorial with non-existing module code
+	requestToJoinTutPayload := api.RequestToJoinTutorialPayload{
+		StudentID:  int(testStudent.ID),
+		ModuleCode: "CS2040S",
+		ClassNo:    "1",
+	}
+	_, status, _ := CreateStudentAuthenticatedMockRequest(requestToJoinTutPayload, fmt.Sprintf("/api/requests/"), "POST", testStudent)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+func TestNonExistingClassNoRequestToJoinTutorial(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty, arbitray where
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	// Create test tutorial
+	_, err = dataaccess.CreateTutorial("1", "CS2040S", 50)
+	assert.NoError(t, err)
+	// Get the test tutorial
+	_, err = dataaccess.GetTutorialByClassAndModuleCode("1", "CS2040S")
+	assert.NoError(t, err)
+
+	// Create a request to join tutorial with non-existing class no
+	requestToJoinTutPayload := api.RequestToJoinTutorialPayload{
+		StudentID:  int(testStudent.ID),
+		ModuleCode: "CS2040S",
+		ClassNo:    "2",
+	}
+	_, status, _ := CreateStudentAuthenticatedMockRequest(requestToJoinTutPayload, fmt.Sprintf("/api/requests/"), "POST", testStudent)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+func TestEmptyRequestToJoinTutorial(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty, arbitray where
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	// Create a request to join tutorial with empty payload
+	_, status, _ := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/requests/"), "POST", testStudent)
+	assert.Equal(t, http.StatusBadRequest, status)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 func TestValidAcceptRequest(t *testing.T) {
 	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.NoError(t, err)
