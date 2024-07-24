@@ -225,6 +225,27 @@ func TestValidAcceptRequest(t *testing.T) {
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
+func TestAcceptNonExistingRequestID(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	// Accept a non-existing request
+	_, status, _ := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/requests/%d/accept", 1), "PATCH", testStudent)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
 func TestValidRejectRequest(t *testing.T) {
 	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
 	assert.NoError(t, err)
@@ -278,6 +299,27 @@ func TestValidRejectRequest(t *testing.T) {
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 	// Delete the test tutorial
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Tutorial{})
+	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
+}
+
+func TestRejectNonExistingRequestID(t *testing.T) {
+	testStudent, _, _, err := CreateSingleMockStudentTeachingAssistantAndTutorial()
+	assert.NoError(t, err)
+
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Current no. of requests in the test db should be 0
+	var count int64
+	database.DB.Table("requests").Count(&count)
+	assert.Equal(t, 0, int(count))
+
+	// Reject a non-existing request
+	_, status, _ := CreateStudentAuthenticatedMockRequest(nil, fmt.Sprintf("/api/requests/%d/reject", 1), "PATCH", testStudent)
+	assert.Equal(t, http.StatusInternalServerError, status)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 	CleanupSingleCreatedStudentTeachingAssistantAndTutorial()
 }
 
