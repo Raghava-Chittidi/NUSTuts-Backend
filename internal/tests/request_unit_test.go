@@ -62,6 +62,20 @@ func TestGetRequest(t *testing.T) {
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
+func TestGetNonExistingRequest(t *testing.T) {
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Get a non-existing request
+	request, err := dataaccess.GetRequestById(1)
+	assert.Error(t, err)
+	// Assert request is nil
+	assert.Nil(t, request)
+
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+}
+
 func TestAcceptRequest(t *testing.T) {
 	// Make sure requests table is empty
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
@@ -95,6 +109,18 @@ func TestAcceptRequest(t *testing.T) {
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
+func TestAcceptNonExistingRequest(t *testing.T) {
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Accept a non-existing request
+	err := dataaccess.AcceptRequestById(1)
+	assert.Error(t, err)
+
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+}
+
 func TestRejectRequest(t *testing.T) {
 	// Make sure requests table is empty
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
@@ -125,6 +151,18 @@ func TestRejectRequest(t *testing.T) {
 	assert.Equal(t, "rejected", request.Status)
 
 	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+}
+
+func TestRejectNonExistingRequest(t *testing.T) {
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Reject a non-existing request
+	err := dataaccess.RejectRequestById(1)
+	assert.Error(t, err)
+
+	// Make sure requests table is empty
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
 
@@ -177,5 +215,21 @@ func TestGetPendingRequest(t *testing.T) {
 	assert.Equal(t, "pending", pendingRequests[0].Status)
 
 	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+}
+
+func TestGetPendingNonExistingRequestTutorial(t *testing.T) {
+	// Make sure requests table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
+
+	// Get pending requests for a non-existing tutorial
+	requests, err := dataaccess.GetPendingRequestsByTutorialId(1)
+	assert.NoError(t, err)
+	// Assert ther requests is empty
+	assert.Empty(t, requests)
+	// Assert the request is an array
+	assert.IsType(t, []*models.Request{}, requests)
+
+	// Make sure requests table is empty
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Request{})
 }
