@@ -78,6 +78,18 @@ func TestGetConsultationById(t *testing.T) {
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
 }
 
+func TestGetConsultationByIdInvalidID(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Get the consultation by an invalid ID
+	_, err := dataaccess.GetConsultationById(1)
+	assert.Error(t, err)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
 func TestBookUnbookedConsultation(t *testing.T) {
 	// Make sure consultations table is empty
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
@@ -123,6 +135,17 @@ func TestBookBookedConsultation(t *testing.T) {
 	assert.Error(t, err)
 	// Assert error message
 	assert.Equal(t, "this consultation is booked by someone else", err.Error())
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestBookConsultationInvalidID(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+	// Book a consultation with an invalid ID
+	_, err := dataaccess.BookConsultationById(1, 1)
+	assert.Error(t, err)
 
 	// Cleanup
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
@@ -177,6 +200,17 @@ func TestInvalidUnbookBookedConsultation(t *testing.T) {
 	assert.Error(t, err)
 	// Assert error message
 	assert.Equal(t, "you are not authorized to unbook this consultation", err.Error())
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestUnbookConsultationInvalidID(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+	// Unbook a consultation with an invalid ID
+	_, err := dataaccess.UnbookConsultationById(1, 1)
+	assert.Error(t, err)
 
 	// Cleanup
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
