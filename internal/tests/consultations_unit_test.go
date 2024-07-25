@@ -205,3 +205,183 @@ func TestDeleteConsultationById(t *testing.T) {
 	// Cleanup
 	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
 }
+
+func TestGetAllConsultationsForTutorialForDate(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Generate consultations for the date
+	err := util.GenerateConsultationsForDate(1, "2021-01-01")
+	assert.NoError(t, err)
+
+	// Get all consultations for the date
+	consultations, err := dataaccess.GetAllConsultationsForTutorialForDate(1, "2021-01-01")
+	assert.NoError(t, err)
+
+	// Check if the consultations were generated properly
+	assert.Equal(t, 2, len(*consultations))
+	assert.Equal(t, 1, (*consultations)[0].TutorialID)
+	assert.Equal(t, 1, (*consultations)[1].TutorialID)
+	assert.Equal(t, 0, (*consultations)[0].StudentID)
+	assert.Equal(t, 0, (*consultations)[1].StudentID)
+	assert.Equal(t, "2021-01-01", (*consultations)[0].Date)
+	assert.Equal(t, "2021-01-01", (*consultations)[1].Date)
+	assert.Equal(t, "10:00", (*consultations)[0].StartTime)
+	assert.Equal(t, "11:00", (*consultations)[0].EndTime)
+	assert.Equal(t, "11:00", (*consultations)[1].StartTime)
+	assert.Equal(t, "12:00", (*consultations)[1].EndTime)
+	assert.False(t, (*consultations)[0].Booked)
+	assert.False(t, (*consultations)[1].Booked)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestGetAllUngeneratedConsultationsForTutorialForDate(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Get all ungenerated consultations for the date
+	consultations, err := dataaccess.GetAllConsultationsForTutorialForDate(1, "2021-01-01")
+	assert.NoError(t, err)
+
+	// Check if the consultations were generated properly
+	assert.Equal(t, 0, len(*consultations))
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestGetBookedConsultationsForTutorialForStudent(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Generate consultations for 3 dates
+	err := util.GenerateConsultationsForDate(1, "2021-01-01")
+	assert.NoError(t, err)
+	err = util.GenerateConsultationsForDate(1, "2021-01-02")
+	assert.NoError(t, err)
+	err = util.GenerateConsultationsForDate(1, "2021-01-03")
+	assert.NoError(t, err)
+
+	// Book some consultation slots
+	var consultation1 models.Consultation
+	database.DB.Where("tutorial_id = ? AND date = ? AND start_time = ?", 1, "2021-01-01", "10:00").First(&consultation1)
+	_, err = dataaccess.BookConsultationById(int(consultation1.ID), 1)
+	assert.NoError(t, err)
+	var consultation2 models.Consultation
+	database.DB.Where("tutorial_id = ? AND date = ? AND start_time = ?", 1, "2021-01-02", "11:00").First(&consultation2)
+	_, err = dataaccess.BookConsultationById(int(consultation2.ID), 1)
+	assert.NoError(t, err)
+	var consultation3 models.Consultation
+	database.DB.Where("tutorial_id = ? AND date = ? AND start_time = ?", 1, "2021-01-03", "10:00").First(&consultation3)
+	_, err = dataaccess.BookConsultationById(int(consultation3.ID), 2)
+	assert.NoError(t, err)
+
+	// Get booked consultations for the student
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForStudent(1, 1, "2021-01-01", "10:00")
+	assert.NoError(t, err)
+
+	// Check if the consultations were generated properly
+	assert.Equal(t, 2, len(*consultations))
+	assert.Equal(t, 1, (*consultations)[0].TutorialID)
+	assert.Equal(t, 1, (*consultations)[1].TutorialID)
+	assert.Equal(t, 1, (*consultations)[0].StudentID)
+	assert.Equal(t, 1, (*consultations)[1].StudentID)
+	assert.Equal(t, "2021-01-01", (*consultations)[0].Date)
+	assert.Equal(t, "2021-01-02", (*consultations)[1].Date)
+	assert.Equal(t, "10:00", (*consultations)[0].StartTime)
+	assert.Equal(t, "11:00", (*consultations)[0].EndTime)
+	assert.Equal(t, "11:00", (*consultations)[1].StartTime)
+	assert.Equal(t, "12:00", (*consultations)[1].EndTime)
+	assert.True(t, (*consultations)[0].Booked)
+	assert.True(t, (*consultations)[1].Booked)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestGetBookedUngeneratedConsultationsForTutorialForStudent(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Get booked consultations for the student
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForStudent(1, 1, "2021-01-01", "10:00")
+	assert.NoError(t, err)
+
+	// Check if the consultations were generated properly
+	assert.Equal(t, 0, len(*consultations))
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestGetBookedConsultationsForTutorialForTA(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Generate consultations for 3 dates
+	err := util.GenerateConsultationsForDate(1, "2021-01-01")
+	assert.NoError(t, err)
+	err = util.GenerateConsultationsForDate(1, "2021-01-02")
+	assert.NoError(t, err)
+	err = util.GenerateConsultationsForDate(1, "2021-01-03")
+	assert.NoError(t, err)
+
+	// Book some consultation slots
+	var consultation1 models.Consultation
+	database.DB.Where("tutorial_id = ? AND date = ? AND start_time = ?", 1, "2021-01-01", "10:00").First(&consultation1)
+	_, err = dataaccess.BookConsultationById(int(consultation1.ID), 1)
+	assert.NoError(t, err)
+	var consultation2 models.Consultation
+	database.DB.Where("tutorial_id = ? AND date = ? AND start_time = ?", 1, "2021-01-02", "11:00").First(&consultation2)
+	_, err = dataaccess.BookConsultationById(int(consultation2.ID), 2)
+	assert.NoError(t, err)
+	var consultation3 models.Consultation
+	database.DB.Where("tutorial_id = ? AND date = ? AND start_time = ?", 1, "2021-01-03", "10:00").First(&consultation3)
+	_, err = dataaccess.BookConsultationById(int(consultation3.ID), 3)
+	assert.NoError(t, err)
+
+	// Get booked consultations for the TA
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForTA(1, "2021-01-01", "10:00")
+	assert.NoError(t, err)
+
+	// Check if the consultations were generated properly
+	assert.Equal(t, 3, len(*consultations))
+	assert.Equal(t, 1, (*consultations)[0].TutorialID)
+	assert.Equal(t, 1, (*consultations)[1].TutorialID)
+	assert.Equal(t, 1, (*consultations)[2].TutorialID)
+	assert.Equal(t, 1, (*consultations)[0].StudentID)
+	assert.Equal(t, 2, (*consultations)[1].StudentID)
+	assert.Equal(t, 3, (*consultations)[2].StudentID)
+	assert.Equal(t, "2021-01-01", (*consultations)[0].Date)
+	assert.Equal(t, "2021-01-02", (*consultations)[1].Date)
+	assert.Equal(t, "2021-01-03", (*consultations)[2].Date)
+	assert.Equal(t, "10:00", (*consultations)[0].StartTime)
+	assert.Equal(t, "11:00", (*consultations)[0].EndTime)
+	assert.Equal(t, "11:00", (*consultations)[1].StartTime)
+	assert.Equal(t, "12:00", (*consultations)[1].EndTime)
+	assert.Equal(t, "10:00", (*consultations)[2].StartTime)
+	assert.Equal(t, "11:00", (*consultations)[2].EndTime)
+	assert.True(t, (*consultations)[0].Booked)
+	assert.True(t, (*consultations)[1].Booked)
+	assert.True(t, (*consultations)[2].Booked)
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
+
+func TestGetBookedUngeneratedConsultationsForTutorialForTA(t *testing.T) {
+	// Make sure consultations table is empty
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+
+	// Get booked consultations for the TA
+	consultations, err := dataaccess.GetBookedConsultationsForTutorialForTA(1, "2021-01-01", "10:00")
+	assert.NoError(t, err)
+
+	// Check if the consultations were generated properly
+	assert.Equal(t, 0, len(*consultations))
+
+	// Cleanup
+	database.DB.Unscoped().Where("1 = 1").Delete(&models.Consultation{})
+}
