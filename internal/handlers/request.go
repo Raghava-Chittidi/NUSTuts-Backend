@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Creates a request for a student to join a tutorial
 func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 	var payload api.RequestToJoinTutorialPayload
 	err := util.ReadJSON(w, r, &payload)
@@ -18,6 +19,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Checks if the tutorial of the module exists
 	tutorial, err := dataaccess.GetTutorialByClassAndModuleCode(payload.ClassNo, payload.ModuleCode)
 	if err != nil {
 		util.ErrorJSON(w, err, http.StatusInternalServerError)
@@ -33,6 +35,7 @@ func RequestToJoinTutorial(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Request sent successfully!"}, http.StatusCreated)
 }
 
+// Gets all pending requests for a tutorial
 func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -64,6 +67,7 @@ func AllPendingRequestsForTutorial(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, res, http.StatusOK)
 }
 
+// Accepts a request for a student to join a tutorial
 func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
@@ -92,6 +96,7 @@ func AcceptRequest(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Accepted request successfully!"}, http.StatusOK)
 }
 
+// Rejects a request for a student to join a tutorial
 func RejectRequest(w http.ResponseWriter, r *http.Request) {
 	requestId, err := strconv.Atoi(chi.URLParam(r, "requestId"))
 	if err != nil {
@@ -108,6 +113,7 @@ func RejectRequest(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Rejected request successfully!"}, http.StatusOK)
 }
 
+// Gets unrequested class no. for a student in a module
 func GetUnrequestedClassNo(w http.ResponseWriter, r *http.Request) {
 	studentId, err := strconv.Atoi(chi.URLParam(r, "studentId"))
 	if err != nil {
