@@ -10,6 +10,7 @@ import (
 const PossibleChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const AttendanceCodeDuration = 5
 
+// Creates a random attendance string for a tutorial, and stores it in the database
 func CreateRandomAttendanceString(tutorialId int) (*models.AttendanceString, error) {
 	bytesArr := make([]byte, 10)
 	for i := range bytesArr {
@@ -27,6 +28,7 @@ func CreateRandomAttendanceString(tutorialId int) (*models.AttendanceString, err
 	return attendanceString, nil
 }
 
+// Gets the ttendance string for a tutorial for the current date
 func GetAttendanceStringByTutorialID(tutorialId int) (*models.AttendanceString, error) {
 	var attendanceString models.AttendanceString
 	result := database.DB.Table("attendance_strings").Where("tutorial_id = ?", tutorialId).First(&attendanceString)
@@ -37,6 +39,7 @@ func GetAttendanceStringByTutorialID(tutorialId int) (*models.AttendanceString, 
 	return &attendanceString, nil
 }
 
+// Gets all attendance for a tutorial on a specific date sorted by student ID in ascending order
 func GetAttendanceByDateAndTutorialID(date string, tutorialId int) (*[]models.Attendance, error) {
 	var attendances []models.Attendance
 	result := database.DB.Table("attendances").Where("date = ?", date).Where("tutorial_id = ?", tutorialId).
@@ -49,11 +52,14 @@ func GetAttendanceByDateAndTutorialID(date string, tutorialId int) (*[]models.At
 	return &attendances, nil
 }
 
+// Gets all attendance for a tutorial on the current date sorted by student ID in ascending order
 func GetTodayAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
 	date := time.Now().UTC().Format("2006-01-02")
 	return GetAttendanceByDateAndTutorialID(date, tutorialId)
 }
 
+// Gets all attendance for a tutorial on all tutorial sessions,
+// Sorted by date in descending order, and student ID in ascending order
 func GetAllAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
 	var attendances []models.Attendance
 	result := database.DB.Table("attendances").
@@ -69,6 +75,8 @@ func GetAllAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) 
 	return &attendances, nil
 }
 
+// Gets all attendance of a student in a tutorial for all tutorial sessions,
+// Sorted by date in descending order
 func GetStudentAttendance(tutorialId int, studentId int) (*[]models.Attendance, error) {
 	var attendances []models.Attendance
 	result := database.DB.Table("attendances").Where("tutorial_id = ?", tutorialId).
@@ -83,6 +91,7 @@ func GetStudentAttendance(tutorialId int, studentId int) (*[]models.Attendance, 
 	return &attendances, nil
 }
 
+// Deletes the attendance string for a tutorial
 func DeleteGeneratedAttendanceString(tutorialId int) error {
 	attendanceString, err := GetAttendanceStringByTutorialID(tutorialId)
 	if err != nil {
@@ -93,6 +102,7 @@ func DeleteGeneratedAttendanceString(tutorialId int) error {
 	return result.Error
 }
 
+// Generates attendance for a tutorial for the current date for all students in the tutorial
 func GenerateTodayAttendanceByTutorialID(tutorialId int) error {
 	studentIds, err := GetAllStudentIdsOfStudentsInTutorial(tutorialId)
 	if err != nil {
@@ -111,6 +121,7 @@ func GenerateTodayAttendanceByTutorialID(tutorialId int) error {
 	return nil
 }
 
+// Generates attendance for a tutorial for a specific date for all students in the tutorial
 func GenerateAttendanceForDateByTutorialID(date string, tutorialId int) error {
 	studentIds, err := GetAllStudentIdsOfStudentsInTutorial(tutorialId)
 	if err != nil {
@@ -128,6 +139,7 @@ func GenerateAttendanceForDateByTutorialID(date string, tutorialId int) error {
 	return nil
 }
 
+// Deletes attendance for a tutorial for the current date
 func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
 	date := time.Now().UTC().Format("2006-01-02")
 	attendances, err := GetAttendanceByDateAndTutorialID(date, tutorialId)
@@ -145,6 +157,7 @@ func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
 	return nil
 }
 
+// Deletes attendance for a tutorial for a specific date
 func DeleteAttendanceForDateByTutorialID(date string, tutorialId int) error {
 	attendances, err := GetAttendanceByDateAndTutorialID(date, tutorialId)
 	if err != nil {
@@ -161,6 +174,9 @@ func DeleteAttendanceForDateByTutorialID(date string, tutorialId int) error {
 	return nil
 }
 
+// Verifies the attendance code for a tutorial
+// By checking if the attendance code exists and has not expired
+// And checks if the attendance code matches the attendance code for the attendance string
 func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 	var attendanceString models.AttendanceString
 	result := database.DB.Table("attendance_strings").Where("code = ?", attendanceCode).
@@ -176,6 +192,7 @@ func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 	return true, nil
 }
 
+// Marks a student as present for a tutorial on the current date
 func MarkPresent(studentId int, tutorialId int) error {
 	var attendance models.Attendance
 	date := time.Now().UTC().Format("2006-01-02")
@@ -190,6 +207,7 @@ func MarkPresent(studentId int, tutorialId int) error {
 	return nil
 }
 
+// Gets the attendance of a student for a tutorial on the current date
 func GetTodayAttendanceByStudentId(studentId int, tutorialId int) (*models.Attendance, error) {
 	var attendance models.Attendance
 	date := time.Now().UTC().Format("2006-01-02")
