@@ -16,6 +16,7 @@ func DeleteConsultationById(id int) error {
 	return nil
 }
 
+// Gets all consultations for a tutorial for a specific date
 func GetAllConsultationsForTutorialForDate(tutorialId int, date string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").
@@ -29,6 +30,7 @@ func GetAllConsultationsForTutorialForDate(tutorialId int, date string) (*[]mode
 	return &consultations, nil
 }
 
+// Gets all booked consultations booked by any student for a tutorial for a specific date for a TA
 func GetBookedConsultationsForTutorialForTA(tutorialId int, date string, time string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").Where("tutorial_id = ?", tutorialId).
@@ -43,6 +45,7 @@ func GetBookedConsultationsForTutorialForTA(tutorialId int, date string, time st
 	return &consultations, nil
 }
 
+// Gets all booked consultations booked by a student for a tutorial for a specific date
 func GetBookedConsultationsForTutorialForStudent(tutorialId int, studentId int, date string, time string) (*[]models.Consultation, error) {
 	var consultations []models.Consultation
 	result := database.DB.Table("consultations").
@@ -58,6 +61,7 @@ func GetBookedConsultationsForTutorialForStudent(tutorialId int, studentId int, 
 	return &consultations, nil
 }
 
+// Gets consultation by its id
 // Tutorial id is not needed as each consultation has a unique id
 func GetConsultationById(id int) (*models.Consultation, error) {
 	var consultation models.Consultation
@@ -69,6 +73,7 @@ func GetConsultationById(id int) (*models.Consultation, error) {
 	return &consultation, nil
 }
 
+// Books a consultation by its id for a student with userID
 func BookConsultationById(id int, userID int) (*models.Consultation, error) {
 	consultation, err := GetConsultationById(id)
 	if err != nil {
@@ -85,6 +90,7 @@ func BookConsultationById(id int, userID int) (*models.Consultation, error) {
 	return consultation, nil
 }
 
+// Unbooks a consultation by its id for a student with userID
 func UnbookConsultationById(id int, userID int) (*models.Consultation, error) {
 	consultation, err := GetConsultationById(id)
 	if err != nil {

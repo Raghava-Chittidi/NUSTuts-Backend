@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Get all consultations for a tutorial for a specific date
 func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -35,6 +36,7 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// If there are no consultations for the tutorial for the date, generate them
 	if len(*consultations) < 2 {
 		util.GenerateConsultationsForDate(tutorialId, consultDate)
 		consultations, err = dataaccess.GetAllConsultationsForTutorialForDate(tutorialId, consultDate)
@@ -56,6 +58,8 @@ func GetConsultationsForTutorialForDate(w http.ResponseWriter, r *http.Request) 
 		Data: res}, http.StatusOK)
 }
 
+// Get all booked consultations booked by any student
+// for a tutorial for a specific date for a teaching assistant
 func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -97,6 +101,7 @@ func GetBookedConsultationsForTutorialForTA(w http.ResponseWriter, r *http.Reque
 	util.WriteJSON(w, api.Response{Message: "Booked consultations for TA fetched successfully!", Data: res}, http.StatusOK)
 }
 
+// Get all booked consultations booked by a student in a tutorial
 func GetBookedConsultationsForTutorialForStudent(w http.ResponseWriter, r *http.Request) {
 	tutorialId, err := strconv.Atoi(chi.URLParam(r, "tutorialId"))
 	if err != nil {
@@ -221,35 +226,7 @@ func getBookedConsultationsResponse(consultations *[]api.ConsultationResponse) a
 	return api.BookedConsultationsResponse{BookedConsultations: sortedConsultations}
 }
 
-// func UpdateConsultationById(w http.ResponseWriter, r *http.Request) {
-// 	// If book is true, book the consultation, else unbook it
-// 	book, err := strconv.ParseBool(r.URL.Query().Get("book"))
-// 	if err != nil {
-// 		util.ErrorJSON(w, err, http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	consultationId, err := strconv.Atoi(chi.URLParam(r, "consultationId"))
-// 	if err != nil {
-// 		util.ErrorJSON(w, err, http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	_, claims, err := auth.AuthObj.VerifyToken(w, r)
-// 	userID := claims.Subject // The "sub" claim is typically used for the user ID
-// 	userIDInt, err := strconv.Atoi(userID)
-// 	if err != nil {
-// 		util.ErrorJSON(w, err, http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	if book {
-// 		dataaccess.BookConsultationById(consultationId, userIDInt)
-// 	} else {
-// 		dataaccess.UnbookConsultationById(consultationId, userIDInt)
-// 	}
-// }
-
+// Book a consultation by its id for a student
 func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 	consultationId, err := strconv.Atoi(chi.URLParam(r, "consultationId"))
 	if err != nil {
@@ -257,6 +234,7 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get the student id
 	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
@@ -281,6 +259,7 @@ func BookConsultationById(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, api.Response{Message: "Consultation succesfully booked", Data: res}, http.StatusOK)
 }
 
+// Cancel a consultation by its id for a student
 func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
 	consultationId, err := strconv.Atoi(chi.URLParam(r, "consultationId"))
 	if err != nil {
@@ -288,6 +267,7 @@ func CancelConsultationById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get the student id
 	userID := r.URL.Query().Get("userId")
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
