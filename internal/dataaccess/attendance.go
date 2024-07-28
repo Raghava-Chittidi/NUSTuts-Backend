@@ -19,7 +19,9 @@ func CreateRandomAttendanceString(tutorialId int) (*models.AttendanceString, err
 	}
 
 	code := string(bytesArr)
-	attendanceString := &models.AttendanceString{Code: code, TutorialID: tutorialId, ExpiresAt: time.Now().UTC().Add(time.Minute * AttendanceCodeDuration)}
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	attendanceString := &models.AttendanceString{Code: code, TutorialID: tutorialId, ExpiresAt: now.Add(time.Minute * AttendanceCodeDuration)}
 	result := database.DB.Table("attendance_strings").Create(attendanceString)
 	if result.Error != nil {
 		return nil, result.Error
@@ -54,7 +56,9 @@ func GetAttendanceByDateAndTutorialID(date string, tutorialId int) (*[]models.At
 
 // Gets all attendance for a tutorial on the current date sorted by student ID in ascending order
 func GetTodayAttendanceByTutorialID(tutorialId int) (*[]models.Attendance, error) {
-	date := time.Now().UTC().Format("2006-01-02")
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	date := now.Format("2006-01-02")
 	return GetAttendanceByDateAndTutorialID(date, tutorialId)
 }
 
@@ -109,7 +113,9 @@ func GenerateTodayAttendanceByTutorialID(tutorialId int) error {
 		return err
 	}
 
-	date := time.Now().UTC().Format("2006-01-02")
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	date := now.Format("2006-01-02")
 	for _, studentId := range *studentIds {
 		attendance := &models.Attendance{StudentID: studentId, TutorialID: tutorialId, Date: date}
 		result := database.DB.Table("attendances").Create(attendance)
@@ -141,7 +147,9 @@ func GenerateAttendanceForDateByTutorialID(date string, tutorialId int) error {
 
 // Deletes attendance for a tutorial for the current date
 func DeleteTodayAttendanceByTutorialID(tutorialId int) error {
-	date := time.Now().UTC().Format("2006-01-02")
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	date := now.Format("2006-01-02")
 	attendances, err := GetAttendanceByDateAndTutorialID(date, tutorialId)
 	if err != nil {
 		return err
@@ -185,7 +193,9 @@ func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 		return false, result.Error
 	}
 
-	if attendanceString.ExpiresAt.Before(time.Now().UTC()) {
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	if attendanceString.ExpiresAt.Before(now) {
 		return false, nil
 	}
 
@@ -195,7 +205,9 @@ func VerifyAttendanceCode(tutorialId int, attendanceCode string) (bool, error) {
 // Marks a student as present for a tutorial on the current date
 func MarkPresent(studentId int, tutorialId int) error {
 	var attendance models.Attendance
-	date := time.Now().UTC().Format("2006-01-02")
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	date := now.Format("2006-01-02")
 	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
 		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
@@ -210,7 +222,9 @@ func MarkPresent(studentId int, tutorialId int) error {
 // Gets the attendance of a student for a tutorial on the current date
 func GetTodayAttendanceByStudentId(studentId int, tutorialId int) (*models.Attendance, error) {
 	var attendance models.Attendance
-	date := time.Now().UTC().Format("2006-01-02")
+	loc, _ := time.LoadLocation("Singapore")
+	now := time.Now().In(loc)
+	date := now.Format("2006-01-02")
 	result := database.DB.Table("attendances").Where("student_id = ?", studentId).
 		Where("tutorial_id = ?", tutorialId).Where("date = ?", date).First(&attendance)
 	if result.Error != nil {
