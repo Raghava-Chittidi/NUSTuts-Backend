@@ -172,7 +172,7 @@ func GetTutorialByClassAndModuleCode(classNo string, moduleCode string) (*models
 	return &tutorial, nil
 }
 
-func GetAllTutorialIDs() (*[]int, error) {
+func GetAllTutorialIds() (*[]int, error) {
 	var tutorialIds []int
 	result := database.DB.Table("tutorials").Select("id").Find(&tutorialIds)
 	if result.Error != nil {

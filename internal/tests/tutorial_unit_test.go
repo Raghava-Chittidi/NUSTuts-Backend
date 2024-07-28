@@ -78,8 +78,9 @@ func TestTutorialDataaccess(t *testing.T) {
 
 	t.Run("Get all Tutorial IDs", func(t *testing.T) {
 		// Get all tutorial ids
-		tutorialIds, err := dataaccess.GetAllTutorialIDs()
+		tutorialIds, err := dataaccess.GetAllTutorialIds()
 		assert.NoError(t, err)
+		assert.Equal(t, len(testTutorialIds), len(*tutorialIds))
 
 		// Compare expected tutorial ids that should be fetched with the actual tutorial ids fetched
 		expectedTutorialIdsBytes, err := json.Marshal(testTutorialIds)

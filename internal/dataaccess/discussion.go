@@ -13,7 +13,7 @@ func CreateDiscussion(id int) error {
 
 // Creates a dicussion for each tutorial present in the database
 func CreateDiscussionForEveryTutorial() error {
-	tutorialIds, err := GetAllTutorialIDs()
+	tutorialIds, err := GetAllTutorialIds()
 	if err != nil {
 		return err
 	}

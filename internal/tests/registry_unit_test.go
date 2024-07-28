@@ -46,7 +46,7 @@ func TestRegistryDataaccess(t *testing.T) {
 
 	t.Run("Get Registry by Student ID and Tutorial ID", func(t *testing.T) {
 		// Get the registry
-		registry, err := dataaccess.GetRegistryByStudentIDAndTutorialID(int(student1.ID), int(tutorial1.ID))
+		registry, err := dataaccess.GetRegistryByStudentIdAndTutorialId(int(student1.ID), int(tutorial1.ID))
 		assert.NoError(t, err)
 
 		// Compare expected registry that should be fetched with the actual registry fetched
