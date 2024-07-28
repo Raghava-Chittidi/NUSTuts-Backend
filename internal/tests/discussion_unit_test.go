@@ -87,7 +87,7 @@ func TestDiscussionDataaccess(t *testing.T) {
 	})
 
 	// Clean up
-	tutorialIds, err := dataaccess.GetAllTutorialIDs()
+	tutorialIds, err := dataaccess.GetAllTutorialIds()
 	assert.NoError(t, err)
 	for _, tutorialId := range *tutorialIds {
 		dataaccess.DeleteTutorialById(tutorialId)

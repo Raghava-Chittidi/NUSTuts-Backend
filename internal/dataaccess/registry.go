@@ -12,7 +12,7 @@ func JoinTutorial(studentId int, tutorialId int) error {
 	return result.Error
 }
 
-func GetRegistryByStudentIDAndTutorialID(studentId int, tutorialId int) (*models.Registry, error) {
+func GetRegistryByStudentIdAndTutorialId(studentId int, tutorialId int) (*models.Registry, error) {
 	var registry models.Registry
 	result := database.DB.Table("registries").Where("student_id = ?", studentId).
 			Where("tutorial_id = ?", tutorialId).Find(&registry)
@@ -69,7 +69,7 @@ func DeleteRegistryByStudentAndTutorial(student *models.Student, tutorial *model
 		return err
 	}
 
-	registry, err := GetRegistryByStudentIDAndTutorialID(int(student.ID), int(tutorial.ID))
+	registry, err := GetRegistryByStudentIdAndTutorialId(int(student.ID), int(tutorial.ID))
 	if err != nil {
 		return err
 	}
